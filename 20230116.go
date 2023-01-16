@@ -2,6 +2,53 @@ package main
 
 import "math"
 
+func longestPalindrome(s string) string {
+	n := len(s)
+	dp := make([][]int, n)
+	for i := 0; i < n; i++ {
+		dp[i] = make([]int, n)
+	}
+	for i := 0; i < n; i++ {
+		dp[i][i] = 1
+	}
+	ans := []int{0, 0}
+	maxi := 0
+	for i := 1; i < n; i++ {
+		for j := i - 1; j >= 0; j-- {
+			if s[i] == s[j] {
+				if j+1 == i {
+					dp[j][i] = 2
+				}
+				if dp[j+1][i-1] > 0 {
+					dp[j][i] = max(dp[j][i], dp[j+1][i-1]+2)
+				}
+				if dp[j][i] > maxi {
+					maxi = dp[j][i]
+					ans = []int{j, i}
+				}
+			}
+		}
+	}
+	return s[ans[0] : ans[1]+1]
+}
+
+func uniquePaths(m int, n int) int {
+	dp := make([][]int, m)
+	for i := 0; i < m; i++ {
+		dp[i] = make([]int, n)
+	}
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if i == 0 || j == 0 {
+				dp[i][j] = 1
+			} else {
+				dp[i][j] = dp[i-1][j] + dp[i][j-1]
+			}
+		}
+	}
+	return dp[m-1][n-1]
+}
+
 func inorderTraversal(root *TreeNode) []int {
 	ans := []int{}
 	var dfs func(*TreeNode)

@@ -1,9 +1,72 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
+
+func getIntersectionNode(headA, headB *ListNode) *ListNode {
+	tempA := headA
+	tempB := headB
+	for headA != nil || headB != nil {
+		if headA == headB {
+			return headA
+		}
+		if headA == nil {
+			headA = tempB
+		} else {
+			headA = headA.Next
+		}
+		if headB == nil {
+			headB = tempA
+		} else {
+			headB = headB.Next
+		}
+	}
+	return nil
+}
+
+func isPalindrome(head *ListNode) bool {
+	if head == nil || head.Next == nil {
+		return true
+	}
+	n := 0
+	temp := head
+	for temp != nil {
+		temp = temp.Next
+		n++
+	}
+	pre := head
+	last := head.Next.Next
+	for last != nil && last.Next != nil {
+		pre = pre.Next
+		last = last.Next.Next
+	}
+	back := pre.Next
+	if n%2 == 1 {
+		back = back.Next
+	}
+	pre.Next = nil
+	front := reverseList(head)
+	for front != nil && back != nil {
+		if front.Val != back.Val {
+			return false
+		}
+		front = front.Next
+		back = back.Next
+	}
+	return true
+}
+
+// 递归版
+func reverseList(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	node := reverseList(head.Next)
+	head.Next.Next = head
+	head.Next = nil
+	return node
+}
 
 func exist(board [][]byte, word string) bool {
 	m := len(board)

@@ -15,25 +15,6 @@ func Test_numIslands(t *testing.T) {
 	assert.Equal(t, 3, got)
 }
 
-// func Test_reverseList(t *testing.T) {
-// 	head := &ListNode{
-// 		Val:  1,
-// 		Next: &ListNode{},
-// 	}
-// 	curr := head
-// 	for i := 2; i <= 5; i++ {
-// 		newNode := &ListNode{
-// 			Val:  i,
-// 			Next: &ListNode{},
-// 		}
-// 		head.Next = newNode
-// 		head = head.Next
-// 	}
-// 	got := reverseList(curr)
-// 	body, _ := json.Marshal(got)
-// 	t.Logf("reverseList: %+v", string(body))
-// }
-
 func Test_minPathSum(t *testing.T) {
 	grid := [][]int{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}}
 	got := minPathSum(grid)

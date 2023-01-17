@@ -67,20 +67,6 @@ func maxDepth(root *TreeNode) int {
 	return max(maxDepth(root.Left), maxDepth(root.Right)) + 1
 }
 
-// func reverseList(head *ListNode) *ListNode {
-// 	if head == nil || head.Next == nil {
-// 		return head
-// 	}
-// 	curr:=&ListNode{}
-// 	for head.Next != nil {
-// 		temp:=head.Next
-// 		head.Next=curr
-// 		curr.Next=curr
-// 		head=head.Next
-// 	}
-// 	return curr
-// }
-
 func numIslands(grid [][]byte) int {
 	ans := 0
 	m := len(grid)

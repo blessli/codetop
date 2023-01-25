@@ -68,6 +68,22 @@ func reverseList(head *ListNode) *ListNode {
 	return node
 }
 
+// 迭代版
+func reverseList1(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	ans := &ListNode{}
+	pre := ans.Next
+	for head != nil {
+		temp := head.Next
+		head.Next = pre
+		pre = head
+		head = temp
+	}
+	return pre
+}
+
 func exist(board [][]byte, word string) bool {
 	m := len(board)
 	n := len(board[0])

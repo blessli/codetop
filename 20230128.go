@@ -100,3 +100,70 @@ func maxPathSum(root *TreeNode) int {
 	dfs(root)
 	return ans
 }
+
+type Trie struct {
+	Next [26]*Trie
+    End bool
+}
+
+func Constructor() Trie {
+	return Trie{}
+}
+// 循环better
+func (t *Trie) Insert(word string) {
+	n := len(word)
+	var dfs func(*Trie, int)
+	dfs = func(root *Trie, pos int) {
+		if pos >= n {
+            root.End=true
+			return
+		}
+		if root.Next[word[pos]-'a'] == nil {
+			root.Next[word[pos]-'a'] = &Trie{}
+		}
+		dfs(root.Next[word[pos]-'a'], pos+1)
+	}
+	node := t
+	dfs(node, 0)
+}
+
+func (t *Trie) Search(word string) bool {
+	ans := t.search(word)
+	if ans == nil || !ans.End{
+		return false
+	}
+	return true
+}
+
+func (t *Trie) search(word string) (ans *Trie) {
+	n := len(word)
+	vis := false
+	var dfs func(*Trie, int)
+	dfs = func(root *Trie, pos int) {
+		if vis {
+			return
+		}
+		if root==nil {
+			return
+		}
+		if pos == n {
+			ans = root
+			vis = true
+			return
+		}
+		dfs(root.Next[word[pos]-'a'], pos+1)
+	}
+	node := t
+	dfs(node, 0)
+	if !vis {
+		ans = nil
+	}
+	return
+}
+
+func (t *Trie) StartsWith(prefix string) bool {
+	if t.search(prefix) == nil {
+		return false
+	}
+	return true
+}

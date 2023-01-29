@@ -1,5 +1,7 @@
 package main
 
+import "sort"
+
 func rob2(root *TreeNode) int {
 	var dfs func(*TreeNode) [2]int
 	ans := 0
@@ -17,4 +19,48 @@ func rob2(root *TreeNode) int {
 	}
 	dfs(root)
 	return ans
+}
+
+func reconstructQueue(people [][]int) [][]int {
+	sort.Slice(people, func(i, j int) bool {
+		a, b := people[i], people[j]
+		return a[0] > b[0] || (a[0] == b[0] && a[1] < b[1])
+	})
+	ans := people
+	for _, v := range people {
+		idx := v[1]
+		ans = append(ans[:idx], append([][]int{v}, ans[idx:]...)...)
+	}
+	return ans
+}
+
+func maxCoins(nums []int) int {
+	n := len(nums)
+	nums = append([]int{1}, nums...)
+	nums = append(nums, 1)
+	dp := make([][]int, n+2)
+	for i := 0; i < n+2; i++ {
+		dp[i] = make([]int, n+2)
+	}
+	for i := 0; i < n+2; i++ {
+		for j := 0; j < n+2; j++ {
+			dp[i][j] = -1
+		}
+	}
+	var dfs func(int, int) int
+	dfs = func(left, right int) int {
+		if left >= right-1 {
+			return 0
+		}
+		if dp[left][right] != -1 {
+			return dp[left][right]
+		}
+		for i := left + 1; i < right; i++ {
+			v := nums[left] * nums[i] * nums[right]
+			v += dfs(left, i) + dfs(i, right)
+			dp[left][right] = max(dp[left][right], v)
+		}
+		return dp[left][right]
+	}
+	return dfs(0, n+1)
 }

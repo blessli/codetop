@@ -118,11 +118,9 @@ func topKFrequent(nums []int, k int) []int {
 	return data[:k]
 }
 
+// 最大正方形 dp
 func maximalSquare(matrix [][]byte) int {
 	m := len(matrix)
-	if m == 0 {
-		return 0
-	}
 	n := len(matrix[0])
 	dp := make([][]int, m)
 	for i := 0; i < m; i++ {
@@ -131,21 +129,23 @@ func maximalSquare(matrix [][]byte) int {
 	ans := 0
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
-			if i == 0 || j == 0 {
-				dp[i][j] = int(matrix[i][j]) - '0'
-				continue
-			}
 			if matrix[i][j] == '0' {
 				continue
 			}
+			if i*j == 0 {
+				dp[i][j] = 1
+				ans = max(ans, 1)
+				continue
+			}
 			dp[i][j] = min(dp[i-1][j-1], min(dp[i][j-1], dp[i-1][j])) + 1
-			ans = max(ans, dp[i][j]*dp[i][j])
+			ans = max(ans, dp[i][j])
 		}
 	}
-	return ans
+	return ans * ans
 }
 
-func findKthLargest(nums []int, k int) int {
+// 数组中的第K个最大元素 快排
+func findKthLargest_(nums []int, k int) int {
 	var dfs func(int, int)
 	dfs1 := func(low, high int) int {
 		start := nums[low]
@@ -173,4 +173,32 @@ func findKthLargest(nums []int, k int) int {
 	}
 	dfs(0, len(nums)-1)
 	return nums[k-1]
+}
+// 大顶堆
+func findKthLargest(nums []int, k int) int {
+	n := len(nums)
+	var dfs func(int, int)
+	dfs = func(i, n int) {
+		l, r, largest := i*2+1, i*2+2, i
+		if l < n && nums[l] > nums[largest] {
+			largest = l
+		}
+		if r < n && nums[r] > nums[largest] {
+			largest = r
+		}
+		if largest != i {
+			nums[i], nums[largest] = nums[largest], nums[i]
+			dfs(largest, n)
+		}
+	}
+	// 建堆
+	for i := n / 2; i >= 0; i-- {
+		dfs(i, n)
+	}
+	for i := len(nums) - 1; i >= len(nums)-k+1; i-- {
+		nums[0], nums[i] = nums[i], nums[0]
+		n--
+		dfs(0, n)
+	}
+	return nums[0]
 }

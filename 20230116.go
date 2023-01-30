@@ -2,6 +2,7 @@ package main
 
 import "math"
 
+// 最长子串 dp 100ms
 func longestPalindrome(s string) string {
 	n := len(s)
 	dp := make([][]int, n)
@@ -32,6 +33,42 @@ func longestPalindrome(s string) string {
 	return s[ans[0] : ans[1]+1]
 }
 
+// 中心扩展算法 4ms
+func longestPalindrome_(s string) string {
+	n := len(s)
+	dfs := func(pos int) [2]int {
+		ans := [2]int{pos, pos}
+		left, right, c := pos-1, pos+1, 1
+		for left >= 0 && right < n && s[left] == s[right] {
+			left--
+			right++
+			c += 2
+		}
+		if c > 1 {
+			ans = [2]int{left + 1, right - 1}
+		}
+		left, right, c = pos-1, pos, 0
+		for left >= 0 && right < n && s[left] == s[right] {
+			left--
+			right++
+			c += 2
+		}
+		if c > ans[1]-ans[0]+1 {
+			ans = [2]int{left + 1, right - 1}
+		}
+		return ans
+	}
+	ans := [2]int{0, 0}
+	for i := 0; i < n; i++ {
+		temp := dfs(i)
+		if (temp[1] - temp[0] + 1) > ans[1]-ans[0]+1 {
+			ans = [2]int{temp[0], temp[1]}
+		}
+	}
+	return s[ans[0] : ans[1]+1]
+}
+
+// 不同路径 二维dp
 func uniquePaths(m int, n int) int {
 	dp := make([][]int, m)
 	for i := 0; i < m; i++ {
@@ -49,6 +86,21 @@ func uniquePaths(m int, n int) int {
 	return dp[m-1][n-1]
 }
 
+// 一维dp 降低空间复杂度
+func uniquePaths_(m int, n int) int {
+	dp := make([]int, n)
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if i == 0 || j == 0 {
+				dp[j] = 1
+			} else {
+				dp[j] += dp[j-1]
+			}
+		}
+	}
+	return dp[n-1]
+}
+
 func inorderTraversal(root *TreeNode) []int {
 	ans := []int{}
 	var dfs func(*TreeNode)
@@ -64,7 +116,7 @@ func inorderTraversal(root *TreeNode) []int {
 }
 
 // 迭代法
-func inorderTraversal2(root *TreeNode) []int {
+func inorderTraversal_(root *TreeNode) []int {
 	if root == nil {
 		return []int{}
 	}

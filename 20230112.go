@@ -9,8 +9,8 @@ type TreeNode struct {
 	Left  *TreeNode
 	Right *TreeNode
 }
-// 迭代法怎么做？
-func invertTree(root *TreeNode) *TreeNode {
+// 翻转二叉树
+func invertTree_(root *TreeNode) *TreeNode {
 	if root == nil {
 		return root
 	}
@@ -21,8 +21,36 @@ func invertTree(root *TreeNode) *TreeNode {
 	invertTree(root.Right)
 	return root
 }
+// bfs 0ms
+func invertTree(root *TreeNode) *TreeNode {
+	if root == nil {
+		return root
+	}
+	invert := func(root *TreeNode) {
+		temp := root.Left
+		root.Left = root.Right
+		root.Right = temp
+	}
+	queue := []*TreeNode{}
+	ans := root
+	queue = append(queue, root)
+	for len(queue) > 0 {
+		size := len(queue)
+		for i := 0; i < size; i++ {
+			curr := queue[i]
+			invert(curr)
+			if curr.Left != nil {
+				queue = append(queue, curr.Left)
+			}
+			if curr.Right != nil {
+				queue = append(queue, curr.Right)
+			}
+		}
+		queue = queue[size:]
+	}
+	return ans
+}
 
-// maybe need to scale
 func climbStairs(n int) int {
 	if n <= 3 {
 		return n
@@ -60,11 +88,37 @@ func minPathSum(grid [][]int) int {
 	return dp[m-1][n-1]
 }
 
+// 二叉树的最大深度
+func maxDepth_(root *TreeNode) int {
+	if root == nil {
+		return 0
+	}
+	return max(maxDepth_(root.Left), maxDepth_(root.Right)) + 1
+}
+
+// bfs 0ms
 func maxDepth(root *TreeNode) int {
 	if root == nil {
 		return 0
 	}
-	return max(maxDepth(root.Left), maxDepth(root.Right)) + 1
+	queue := []*TreeNode{}
+	queue = append(queue, root)
+	ans := 0
+	for len(queue) > 0 {
+		size := len(queue)
+		for i := 0; i < size; i++ {
+			curr := queue[i]
+			if curr.Left != nil {
+				queue = append(queue, curr.Left)
+			}
+			if curr.Right != nil {
+				queue = append(queue, curr.Right)
+			}
+		}
+		queue = queue[size:]
+		ans++
+	}
+	return ans
 }
 
 func numIslands(grid [][]byte) int {

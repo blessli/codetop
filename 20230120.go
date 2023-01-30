@@ -24,7 +24,7 @@ func combinationSum(candidates []int, target int) [][]int {
 	dfs([]int{}, 0, 0)
 	return ans
 }
-
+// 乘积最大子数组 优雅
 func maxProduct(nums []int) int {
 	ans := math.MinInt32
 	n := len(nums)
@@ -99,7 +99,7 @@ type MinStack struct {
 	mindata []int
 }
 
-func Constructor() MinStack {
+func Constructor2() MinStack {
 	return MinStack{}
 }
 

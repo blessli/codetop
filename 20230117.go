@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// 相交链表
 func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	tempA := headA
 	tempB := headB
@@ -25,24 +26,32 @@ func getIntersectionNode(headA, headB *ListNode) *ListNode {
 	return nil
 }
 
+// 回文链表
 func isPalindrome(head *ListNode) bool {
 	if head == nil || head.Next == nil {
 		return true
 	}
-	n := 0
-	temp := head
-	for temp != nil {
-		temp = temp.Next
-		n++
+	length := func(head *ListNode) int {
+		n := 0
+		temp := head
+		for temp != nil {
+			temp = temp.Next
+			n++
+		}
+		return n
 	}
-	pre := head
-	last := head.Next.Next
-	for last != nil && last.Next != nil {
-		pre = pre.Next
-		last = last.Next.Next
+	midNode := func(head *ListNode) *ListNode {
+		pre := head
+		last := head.Next.Next
+		for last != nil && last.Next != nil {
+			pre = pre.Next
+			last = last.Next.Next
+		}
+		return pre
 	}
+	pre := midNode(head)
 	back := pre.Next
-	if n%2 == 1 {
+	if length(head)%2 == 1 {
 		back = back.Next
 	}
 	pre.Next = nil
@@ -57,7 +66,7 @@ func isPalindrome(head *ListNode) bool {
 	return true
 }
 
-// 递归版
+// 反转链表 递归版
 func reverseList(head *ListNode) *ListNode {
 	if head == nil || head.Next == nil {
 		return head
@@ -84,48 +93,35 @@ func reverseList1(head *ListNode) *ListNode {
 	return pre
 }
 
+// 单词搜索 递归
 func exist(board [][]byte, word string) bool {
 	m := len(board)
 	n := len(board[0])
-	ans := false
-	vis := make([][]bool, m)
+	var dfs func(int, int, int) bool
+	dfs = func(x, y, k int) bool {
+		if k >= len(word) {
+			return true
+		}
+		if x < 0 || x >= m || y < 0 || y >= n || board[x][y] != word[k] {
+			return false
+		}
+		board[x][y] += 'a' // 打上标记，降低空间复杂度
+		result := dfs(x-1, y, k+1) || dfs(x+1, y, k+1) || dfs(x, y-1, k+1) || dfs(x, y+1, k+1)
+		board[x][y] -= 'a'
+		return result
+	}
 	for i := 0; i < m; i++ {
-		vis[i] = make([]bool, n)
-	}
-	count := len(word)
-	dist := [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
-	var dfs func(int, int, int)
-	dfs = func(x, y, pos int) {
-		if ans {
-			return
-		}
-		if pos == count {
-			ans = true
-			return
-		}
-		for i := 0; i < 4; i++ {
-			xx := x + dist[i][0]
-			yy := y + dist[i][1]
-			if xx >= 0 && xx < m && yy >= 0 && yy < n && pos < count && board[xx][yy] == word[pos] && !vis[xx][yy] {
-				vis[xx][yy] = true
-				dfs(xx, yy, pos+1)
-				vis[xx][yy] = false
+		for j := 0; j < n; j++ {
+			if dfs(i, j, 0) {
+				return true
 			}
 		}
 	}
-	for i := 0; i < m && !ans; i++ {
-		for j := 0; j < n && !ans; j++ {
-			if board[i][j] == word[0] {
-				vis[i][j] = true
-				dfs(i, j, 1)
-				vis[i][j] = false
-			}
-		}
-	}
-	return ans
+	return false
 }
 
-func wordBreak(s string, wordDict []string) bool {
+// 单词拆分 记忆化搜索 4ms
+func wordBreak_(s string, wordDict []string) bool {
 	count := len(wordDict)
 	ans := false
 	vis := map[string]bool{}
@@ -148,4 +144,23 @@ func wordBreak(s string, wordDict []string) bool {
 	}
 	dfs("")
 	return ans
+}
+// dp 0ms
+func wordBreak(s string, wordDict []string) bool {
+	dict := map[string]bool{}
+	for _, word := range wordDict {
+		dict[word] = true
+	}
+	n := len(s)
+	dp := make([]bool, n+1)// 前i个字符可被拆分
+	dp[0] = true
+	for i := 1; i <= n; i++ {
+		for j := 0; j < i; j++ {
+			if dp[j] && dict[s[j:i]] {
+				dp[i] = true
+				break
+			}
+		}
+	}
+	return dp[n]
 }

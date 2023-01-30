@@ -79,7 +79,7 @@ func findDuplicate(nums []int) int {
 	fmt.Println(nums)
 	return 0
 }
-
+// 盛最多水的容器
 func maxArea(height []int) int {
 	left, right := 0, len(height)-1
 	ans := 0

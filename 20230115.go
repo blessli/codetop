@@ -63,7 +63,7 @@ func searchMatrix(matrix [][]int, target int) bool {
 	}
 	return false
 }
-
+// 在排序数组中查找元素的第一个和最后一个位置
 func searchRange(nums []int, target int) []int {
 	if len(nums) == 0 {
 		return []int{-1, -1}
@@ -95,7 +95,8 @@ func searchRange(nums []int, target int) []int {
 	return []int{left, right - 1}
 }
 
-func isValidBST(root *TreeNode) bool {
+// 验证二叉搜索树 8ms
+func isValidBST_(root *TreeNode) bool {
 	var dfs func(*TreeNode, int, int) bool
 	dfs = func(root *TreeNode, low, high int) bool {
 		if root == nil {
@@ -107,4 +108,34 @@ func isValidBST(root *TreeNode) bool {
 		return dfs(root.Left, low, root.Val) && dfs(root.Right, root.Val, high)
 	}
 	return dfs(root.Left, math.MinInt64, root.Val) && dfs(root.Right, root.Val, math.MaxInt64)
+}
+
+// 迭代法 0ms
+func isValidBST(root *TreeNode) bool {
+	stack := []*TreeNode{}
+	stack = append(stack, root)
+	pre := math.MinInt32 - 1
+	vis := true
+	for len(stack) > 0 || root != nil {
+		for root != nil {
+			if root.Left != nil {
+				stack = append(stack, root.Left)
+			}
+			root = root.Left
+		}
+		root = stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if root.Val <= pre {
+			vis = false
+			break
+		}
+		pre = root.Val
+		if root != nil {
+			if root.Right != nil {
+				stack = append(stack, root.Right)
+			}
+			root = root.Right
+		}
+	}
+	return vis
 }

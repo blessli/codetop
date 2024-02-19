@@ -2,6 +2,7 @@ package main
 
 import "sort"
 
+// https://leetcode.cn/problems/two-sum/description/
 func twoSum(nums []int, target int) []int {
 	m := map[int]int{}
 	for i := 0; i < len(nums); i++ {

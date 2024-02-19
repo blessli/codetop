@@ -1,55 +1,64 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 )
 
+// 1 https://leetcode.cn/problems/symmetric-tree/description/
 func isSymmetric(root *TreeNode) bool {
 	if root == nil {
 		return true
 	}
 	var dfs func(*TreeNode, *TreeNode) bool
-	dfs = func(root1, root2 *TreeNode) bool {
-		if root1 == nil && root2 == nil {
+	dfs = func(node1, node2 *TreeNode) bool {
+		if node1 == nil && node2 == nil {
 			return true
 		}
-		if root1 == nil || root2 == nil {
+		if node1 == nil || node2 == nil || node1.Val != node2.Val {
 			return false
 		}
-		if root1.Val != root2.Val {
-			return false
-		}
-		return dfs(root1.Right, root2.Left) && dfs(root1.Left, root2.Right)
+		return dfs(node1.Left, node2.Right) && dfs(node1.Right, node2.Left)
 	}
 	return dfs(root.Left, root.Right)
 }
 
+// 1 https://leetcode.cn/problems/symmetric-tree/description/
+func isSymmetric_bfs(root *TreeNode) bool {
+	if root == nil {
+		return true
+	}
+	queue := []*TreeNode{root.Left, root.Right}
+	for len(queue) > 0 {
+		node1, node2 := queue[0], queue[1]
+		queue = queue[2:]
+		if node1 == nil && node2 == nil {
+			continue
+		}
+		if node1 == nil || node2 == nil || node1.Val != node2.Val {
+			return false
+		}
+		queue = append(queue, node1.Left, node2.Right, node1.Right, node2.Left)
+	}
+	return true
+}
+
+// 2 https://leetcode.cn/problems/merge-intervals/description/
 func merge(intervals [][]int) [][]int {
 	if len(intervals) == 1 {
 		return intervals
 	}
 	sort.Slice(intervals, func(i, j int) bool {
-		if intervals[i][0] < intervals[j][0] {
-			return true
-		} else if intervals[i][0] == intervals[j][0] && intervals[i][1] < intervals[j][1] {
-			return true
-		}
-		return false
+		return intervals[i][0] < intervals[j][0]
 	})
-	fmt.Println(intervals)
-	ans := make([][]int, 0)
-	pre := intervals[0]
-	for i := 1; i < len(intervals); i++ {
-		if intervals[i][0] <= pre[1] {
-			pre = []int{pre[0], max(intervals[i][1], pre[1])}
+	merged := make([][]int, 0)
+	for _, interval := range intervals {
+		if len(merged) == 0 || merged[len(merged)-1][1] < interval[0] {
+			merged = append(merged, interval)
 		} else {
-			ans = append(ans, pre)
-			pre = []int{intervals[i][0], intervals[i][1]}
+			merged[len(merged)-1][1] = max(merged[len(merged)-1][1],interval[1])
 		}
 	}
-	ans = append(ans, pre)
-	return ans
+	return merged
 }
 
 func coinChange(coins []int, amount int) int {

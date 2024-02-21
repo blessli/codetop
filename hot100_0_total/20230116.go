@@ -1,75 +1,74 @@
 package main
 
-import "math"
-
-// 最长子串 dp 100ms
+// 最长回文子串 https://leetcode.cn/problems/longest-palindromic-substring/description/
 func longestPalindrome(s string) string {
 	n := len(s)
-	dp := make([][]int, n)
-	for i := 0; i < n; i++ {
-		dp[i] = make([]int, n)
+	if n < 2 {
+		return s
 	}
+	dp := make([][]bool, n)
 	for i := 0; i < n; i++ {
-		dp[i][i] = 1
+		dp[i] = make([]bool, n)
+		dp[i][i] = true
 	}
-	ans := []int{0, 0}
-	maxi := 0
-	for i := 1; i < n; i++ {
-		for j := i - 1; j >= 0; j-- {
-			if s[i] == s[j] {
-				if j+1 == i {
-					dp[j][i] = 2
-				}
-				if dp[j+1][i-1] > 0 {
-					dp[j][i] = max(dp[j][i], dp[j+1][i-1]+2)
-				}
-				if dp[j][i] > maxi {
-					maxi = dp[j][i]
-					ans = []int{j, i}
+	start, maxLen := 0, 1
+	for l := 2; l <= n; l++ {
+		for i := 0; i < n-l+1; i++ {
+			j := i + l - 1
+			if s[i] == s[j] && (l == 2 || dp[i+1][j-1]) {
+				dp[i][j] = true
+				if l > maxLen {
+					start = i
+					maxLen = l
 				}
 			}
 		}
 	}
-	return s[ans[0] : ans[1]+1]
+	return s[start : start+maxLen]
 }
 
-// 中心扩展算法 4ms
-func longestPalindrome_(s string) string {
+// 最长回文子串 https://leetcode.cn/problems/longest-palindromic-substring/description/
+func longestPalindrome2(s string) string {
 	n := len(s)
-	dfs := func(pos int) [2]int {
-		ans := [2]int{pos, pos}
-		left, right, c := pos-1, pos+1, 1
-		for left >= 0 && right < n && s[left] == s[right] {
-			left--
-			right++
-			c += 2
-		}
-		if c > 1 {
-			ans = [2]int{left + 1, right - 1}
-		}
-		left, right, c = pos-1, pos, 0
-		for left >= 0 && right < n && s[left] == s[right] {
-			left--
-			right++
-			c += 2
-		}
-		if c > ans[1]-ans[0]+1 {
-			ans = [2]int{left + 1, right - 1}
-		}
-		return ans
+	if n < 2 {
+		return s
 	}
-	ans := [2]int{0, 0}
+	expandAroundCenter := func(left, right int) int {
+		for left >= 0 && right < n && s[left] == s[right] {
+			left--
+			right++
+		}
+		return right - left - 1
+	}
+	start, end := 0, 0
 	for i := 0; i < n; i++ {
-		temp := dfs(i)
-		if (temp[1] - temp[0] + 1) > ans[1]-ans[0]+1 {
-			ans = [2]int{temp[0], temp[1]}
+		len1 := expandAroundCenter(i, i)
+		len2 := expandAroundCenter(i, i+1)
+		maxLen := max(len1, len2)
+		if maxLen > end-start {
+			start = i - (maxLen-1)/2
+			end = i + maxLen/2
 		}
 	}
-	return s[ans[0] : ans[1]+1]
+	return s[start : end+1]
 }
 
-// 不同路径 二维dp
+// 不同路径 https://leetcode.cn/problems/unique-paths/description/
 func uniquePaths(m int, n int) int {
+	dp := make([]int, n)
+	for i := 0; i < n; i++ {
+		dp[i] = 1
+	}
+	for i := 1; i < m; i++ {
+		for j := 1; j < n; j++ {
+			dp[j] += dp[j-1]
+		}
+	}
+	return dp[n-1]
+}
+
+// 不同路径 https://leetcode.cn/problems/unique-paths/description/
+func uniquePaths2(m int, n int) int {
 	dp := make([][]int, m)
 	for i := 0; i < m; i++ {
 		dp[i] = make([]int, n)
@@ -86,98 +85,59 @@ func uniquePaths(m int, n int) int {
 	return dp[m-1][n-1]
 }
 
-// 一维dp 降低空间复杂度
-func uniquePaths_(m int, n int) int {
-	dp := make([]int, n)
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if i == 0 || j == 0 {
-				dp[j] = 1
-			} else {
-				dp[j] += dp[j-1]
-			}
-		}
-	}
-	return dp[n-1]
-}
-
+// 二叉树的中序遍历 https://leetcode.cn/problems/binary-tree-inorder-traversal/description/
 func inorderTraversal(root *TreeNode) []int {
-	ans := []int{}
-	var dfs func(*TreeNode)
-	dfs = func(root *TreeNode) {
-		if root != nil {
-			dfs(root.Left)
-			ans = append(ans, root.Val)
-			dfs(root.Right)
+	var ans []int
+	var dfs func(node *TreeNode)
+	dfs = func(node *TreeNode) {
+		if node != nil {
+			dfs(node.Left)
+			ans = append(ans, node.Val)
+			dfs(node.Right)
 		}
 	}
 	dfs(root)
 	return ans
 }
 
-// 迭代法
-func inorderTraversal_(root *TreeNode) []int {
-	if root == nil {
-		return []int{}
-	}
-	ans := []int{}
-	stack := make([]*TreeNode, 0)
-	stack = append(stack, root)
-	for len(stack) > 0 && root != nil {
-		for root != nil {
-			if root.Left != nil {
-				stack = append(stack, root.Left)
-			}
-			root = root.Left
+// 二叉树的中序遍历 https://leetcode.cn/problems/binary-tree-inorder-traversal/description/
+func inorderTraversal2(root *TreeNode) []int {
+	var ans []int
+	stack := []*TreeNode{}
+	curr := root
+	for curr != nil || len(stack) > 0 {
+		for curr != nil {
+			stack = append(stack, curr)
+			curr = curr.Left
 		}
-		root = stack[len(stack)-1]
-		ans = append(ans, root.Val)
+		curr = stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
-		if root != nil {
-			if root.Right != nil {
-				stack = append(stack, root.Right)
-			}
-			root = root.Right
-		}
+		ans = append(ans, curr.Val)
+		curr = curr.Right
 	}
 	return ans
 }
 
+// 删除链表的倒数第 N 个结点 https://leetcode.cn/problems/remove-nth-node-from-end-of-list/description/
 func removeNthFromEnd(head *ListNode, n int) *ListNode {
-	temp := head
-	pre := head
-	last := head
-	count := 0
-	for head != nil {
-		head = head.Next
-		count++
+	dummy := &ListNode{0, head}
+	fast, slow := dummy, dummy
+	for i := 0; i < n+1; i++ {
+		fast = fast.Next
 	}
-	if count == 1 {
-		return nil
+	for fast != nil {
+		fast = fast.Next
+		slow = slow.Next
 	}
-	if count == n {
-		return temp.Next
-	}
-	for i := 0; i < n; i++ {
-		pre = pre.Next
-	}
-	for pre != nil && pre.Next != nil {
-		pre = pre.Next
-		last = last.Next
-	}
-	if last.Next != nil {
-		last.Next = last.Next.Next
-	}
-	return temp
+	slow.Next = slow.Next.Next
+	return dummy.Next
 }
 
+// 完全平方数 https://leetcode.cn/problems/perfect-squares/description/
 func numSquares(n int) int {
 	dp := make([]int, n+1)
-	for i := 0; i <= n; i++ {
-		dp[i] = math.MaxInt32
-	}
-	dp[0] = 0
 	for i := 1; i <= n; i++ {
+		dp[i] = i
 		for j := 1; j*j <= i; j++ {
 			dp[i] = min(dp[i], dp[i-j*j]+1)
 		}

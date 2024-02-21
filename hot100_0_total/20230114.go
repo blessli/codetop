@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-// 1 https://leetcode.cn/problems/symmetric-tree/description/
+// 对称二叉树 https://leetcode.cn/problems/symmetric-tree/description/
 func isSymmetric(root *TreeNode) bool {
 	if root == nil {
 		return true
@@ -22,7 +22,7 @@ func isSymmetric(root *TreeNode) bool {
 	return dfs(root.Left, root.Right)
 }
 
-// 1 https://leetcode.cn/problems/symmetric-tree/description/
+// 对称二叉树 https://leetcode.cn/problems/symmetric-tree/description/
 func isSymmetric_bfs(root *TreeNode) bool {
 	if root == nil {
 		return true
@@ -42,7 +42,7 @@ func isSymmetric_bfs(root *TreeNode) bool {
 	return true
 }
 
-// 2 https://leetcode.cn/problems/merge-intervals/description/
+// 合并区间 https://leetcode.cn/problems/merge-intervals/description/
 func merge(intervals [][]int) [][]int {
 	if len(intervals) == 1 {
 		return intervals
@@ -55,40 +55,34 @@ func merge(intervals [][]int) [][]int {
 		if len(merged) == 0 || merged[len(merged)-1][1] < interval[0] {
 			merged = append(merged, interval)
 		} else {
-			merged[len(merged)-1][1] = max(merged[len(merged)-1][1],interval[1])
+			merged[len(merged)-1][1] = max(merged[len(merged)-1][1], interval[1])
 		}
 	}
 	return merged
 }
 
+// 零钱兑换 https://leetcode.cn/problems/coin-change/description/
 func coinChange(coins []int, amount int) int {
 	if amount == 0 {
 		return 0
 	}
 	dp := make([]int, amount+1)
-	for i := 0; i <= amount; i++ {
-		dp[i] = 1e7
+	for i := 1; i <= amount; i++ {
+		dp[i] = amount + 1
 	}
-	for _, v := range coins {
-		if v <= amount {
-			dp[v] = 1
+	for _, coin := range coins {
+		for i := coin; i <= amount; i++ {
+			dp[i] = min(dp[i], dp[i-coin]+1)
 		}
 	}
-	for i := 0; i <= amount; i++ {
-		for _, v := range coins {
-			if v < i {
-				dp[i] = min(dp[i], dp[i-v]+1)
-			}
-		}
-	}
-	if dp[amount] == 1e7 {
+	if dp[amount] > amount {
 		return -1
 	}
 	return dp[amount]
 }
 
-// O(n^2) dp
-func lengthOfLIS(nums []int) int {
+// 最长上升子序列 https://leetcode.cn/problems/longest-increasing-subsequence/description/
+func lengthOfLIS_dp(nums []int) int {
 	n := len(nums)
 	dp := make([]int, n)
 	for i := 0; i < n; i++ {
@@ -106,48 +100,39 @@ func lengthOfLIS(nums []int) int {
 	return ans
 }
 
-// O(nlogn)
-func lengthOfLIS2(nums []int) int {
+// 最长上升子序列 https://leetcode.cn/problems/longest-increasing-subsequence/description/
+func lengthOfLIS(nums []int) int {
 	n := len(nums)
-	dp := make([]int, n)
-	cnt := 0
-	search := func(target int) int {
-		left := 0
-		right := cnt - 1
-		for left <= right {
-			mid := left + (right-left)/2
-			v := dp[mid]
-			if v == target {
-				left = mid
-				break
-			} else if v < target {
-				left = mid + 1
+	tails := make([]int, n)
+	size := 0
+	for _, num := range nums {
+		l, r := 0, size
+		for l < r {
+			mid := l + (r-l)/2
+			if tails[mid] < num {
+				l = mid + 1
 			} else {
-				right = mid - 1
+				r = mid
 			}
 		}
-		return left
-	}
-	for i := 0; i < n; i++ {
-		index := search(nums[i])
-		dp[index] = nums[i]
-		if index >= cnt {
-			cnt++
+		tails[l] = num
+		if l == size {
+			size++
 		}
 	}
-	return cnt
+	return size
 }
 
+// 买卖股票的最佳时机 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/description/
 func maxProfit(prices []int) int {
+	if len(prices) == 0 {
+		return 0
+	}
 	mini := prices[0]
 	ans := 0
-	for _, v := range prices {
-		if v > mini {
-			ans = max(ans, v-mini)
-		}
-		if v < mini {
-			mini = v
-		}
+	for _, price := range prices {
+		ans = max(ans, price-mini)
+		mini = min(mini, price)
 	}
 	return ans
 }

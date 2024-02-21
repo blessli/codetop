@@ -1,6 +1,6 @@
 package main
 
-// 1 https://leetcode.cn/problems/linked-list-cycle/description/
+// 环形链表 https://leetcode.cn/problems/linked-list-cycle/description/
 func hasCycle(head *ListNode) bool {
 	if head == nil || head.Next == nil {
 		return false
@@ -18,7 +18,7 @@ func hasCycle(head *ListNode) bool {
 	return false
 }
 
-// 1 https://leetcode.cn/problems/single-number/description/
+// 只出现一次的数字 https://leetcode.cn/problems/single-number/description/
 func singleNumber(nums []int) int {
 	ans := 0
 	for _, v := range nums {
@@ -27,7 +27,7 @@ func singleNumber(nums []int) int {
 	return ans
 }
 
-// 1 https://leetcode.cn/problems/binary-search/description/
+//  二分查找 https://leetcode.cn/problems/binary-search/description/
 func search(nums []int, target int) int {
 	left, right := 0, len(nums)-1
 	for left <= right {
@@ -42,7 +42,7 @@ func search(nums []int, target int) int {
 	}
 	return -1
 }
-// 2 https://leetcode.cn/problems/binary-tree-level-order-traversal/description/
+// 二叉树的层序遍历 https://leetcode.cn/problems/binary-tree-level-order-traversal/description/
 func levelOrder(root *TreeNode) [][]int {
 	if root == nil {
 		return [][]int{}
@@ -68,7 +68,7 @@ func levelOrder(root *TreeNode) [][]int {
 	return ans
 }
 
-// 2 https://leetcode.cn/problems/binary-tree-right-side-view/description/
+// 二叉树的右视图 https://leetcode.cn/problems/binary-tree-right-side-view/description/
 func rightSideView(root *TreeNode) []int {
 	if root == nil {
 		return []int{}

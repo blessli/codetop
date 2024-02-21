@@ -2,7 +2,7 @@ package main
 
 import "sort"
 
-// 1 https://leetcode.cn/problems/two-sum/description/
+// 两数之和 https://leetcode.cn/problems/two-sum/description/
 func twoSum(nums []int, target int) []int {
 	m := map[int]int{}
 	for i := 0; i < len(nums); i++ {
@@ -15,7 +15,7 @@ func twoSum(nums []int, target int) []int {
 	return nil
 }
 
-// 1 https://leetcode.cn/problems/valid-parentheses/description/
+// 有效的括号 https://leetcode.cn/problems/valid-parentheses/description/
 func isValid(s string) bool {
 	mapping := map[byte]byte{
 		')': '(',
@@ -37,7 +37,7 @@ func isValid(s string) bool {
 	return len(stack) == 0
 }
 
-// 2 https://leetcode.cn/problems/3sum/description/
+// 三数之和 https://leetcode.cn/problems/3sum/description/
 func threeSum(nums []int) [][]int {
 	sort.Ints(nums)
 	ans := [][]int{}
@@ -69,7 +69,7 @@ func threeSum(nums []int) [][]int {
 	return ans
 }
 
-// 1 https://leetcode.cn/problems/maximum-subarray/description/
+// 最大子数组和 https://leetcode.cn/problems/maximum-subarray/description/
 func maxSubArray(nums []int) int {
 	if len(nums) == 0 {
 		return 0
@@ -83,7 +83,7 @@ func maxSubArray(nums []int) int {
 	return maxNum
 }
 
-// 2 https://leetcode.cn/problems/longest-substring-without-repeating-characters/
+// 无重复字符的最长子串 https://leetcode.cn/problems/longest-substring-without-repeating-characters/
 func lengthOfLongestSubstring(s string) int {
 	m := map[byte]int{}
 	maxLen := 0

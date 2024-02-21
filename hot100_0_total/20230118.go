@@ -1,109 +1,110 @@
 package main
 
-import "sort"
-
+// 跳跃游戏 https://leetcode.cn/problems/jump-game/description/
 func canJump(nums []int) bool {
 	n := len(nums)
 	if n == 1 {
 		return true
 	}
-	m := n - 1
+	target := n - 1
 	for i := n - 2; i >= 0; i-- {
-		if nums[i]+i >= m {
-			m = i
+		if nums[i]+i >= target { // 贪心算法
+			target = i
 		}
 	}
-	return m == 0
+	return target == 0
 }
 
+// 二叉树的最近公共祖先 https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/
 func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
-	pre := map[int]*TreeNode{}
-	var dfs func(*TreeNode)
-	dfs = func(root *TreeNode) {
-		if root == nil {
-			return
+	parent := map[*TreeNode]*TreeNode{}
+	stack := []*TreeNode{root}
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if node.Left != nil {
+			parent[node.Left] = node
+			stack = append(stack, node.Left)
 		}
-		if root.Left != nil {
-			pre[root.Left.Val] = root
+		if node.Right != nil {
+			parent[node.Right] = node
+			stack = append(stack, node.Right)
 		}
-		if root.Right != nil {
-			pre[root.Right.Val] = root
-		}
-		dfs(root.Left)
-		dfs(root.Right)
 	}
-	dfs(root)
-	vis := map[int]bool{}
+	ancestors := map[*TreeNode]bool{}
 	for p != nil {
-		vis[p.Val] = true
-		p = pre[p.Val]
+		ancestors[p] = true
+		p = parent[p]
 	}
 	for q != nil {
-		if vis[q.Val] {
+		if ancestors[q] {
 			return q
 		}
-		q = pre[q.Val]
+		q = parent[q]
 	}
 	return nil
 }
 
-// 搜索旋转排序数组
+// 搜索旋转排序数组 https://leetcode.cn/problems/search-in-rotated-sorted-array/description/
 func search1(nums []int, target int) int {
 	left := 0
 	right := len(nums) - 1
 	for left <= right {
 		mid := left + (right-left)/2
-		v := nums[mid]
-		if v == target {
+		if nums[mid] == target {
 			return mid
 		}
-		if v > target {
-			if target < nums[left] && v > nums[right] {
-				left = mid + 1
-			} else {
+		if nums[left] <= nums[mid] { // 左半部分是否有序
+			if nums[left] <= target && target < nums[mid] {
 				right = mid - 1
+			} else {
+				left = mid + 1
 			}
 		} else {
-			if target > nums[right] && v < nums[left] {
-				right = mid - 1
-			} else {
+			if nums[mid] < target && target <= nums[right] { // 右半部分是否有序
 				left = mid + 1
+			} else {
+				right = mid - 1
 			}
 		}
 	}
 	return -1
 }
-
+// 全排列 https://leetcode.cn/problems/permutations/description/
 func permute(nums []int) [][]int {
+	var res [][]int
 	n := len(nums)
-	vis := make([]int, n)
-	ans := [][]int{}
-	var dfs func([]int, int)
-	dfs = func(curr []int, depth int) {
-		if depth == n {
-			temp := make([]int, n)
-			for i := 0; i < n; i++ {
-				temp[i] = curr[i]
-			}
-			ans = append(ans, temp)
+	var dfs func(start int)
+	dfs = func(start int) {
+		if start == n {
+			perm := make([]int, n)
+			copy(perm, nums)
+			res = append(res, perm)
 			return
 		}
-		for i := 0; i < n; i++ {
-			if vis[i] == 0 {
-				vis[i] = 1
-				curr[depth] = nums[i]
-				dfs(curr, depth+1)
-				curr[depth] = 0
-				vis[i] = 0
-			}
+		for i := start; i < n; i++ {
+			nums[start], nums[i] = nums[i], nums[start]
+			dfs(start + 1)
+			nums[start], nums[i] = nums[i], nums[start]
 		}
 	}
-	dfs(make([]int, n), 0)
-	return ans
+	dfs(0)
+	return res
 }
 
-// O(1)空间复杂度
+// 多数元素 https://leetcode.cn/problems/majority-element/description/
 func majorityElement(nums []int) int {
-	sort.Ints(nums)
-	return nums[len(nums)/2]
+	candidate := nums[0]
+	count := 1
+	for i := 1; i < len(nums); i++ {
+		if count == 0 {
+			candidate = nums[i]
+			count = 1
+		} else if candidate == nums[i] {
+			count++
+		} else {
+			count--
+		}
+	}
+	return candidate
 }

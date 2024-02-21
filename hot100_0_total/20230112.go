@@ -10,7 +10,7 @@ type TreeNode struct {
 	Right *TreeNode
 }
 
-// 1 https://leetcode.cn/problems/invert-binary-tree/description/
+// 翻转二叉树 https://leetcode.cn/problems/invert-binary-tree/description/
 func invertTree(root *TreeNode) *TreeNode {
 	if root == nil {
 		return root
@@ -19,7 +19,7 @@ func invertTree(root *TreeNode) *TreeNode {
 	return root
 }
 
-// 1 https://leetcode.cn/problems/invert-binary-tree/description/
+// 翻转二叉树 https://leetcode.cn/problems/invert-binary-tree/description/
 func invertTree_bfs(root *TreeNode) *TreeNode {
 	if root == nil {
 		return root
@@ -39,7 +39,7 @@ func invertTree_bfs(root *TreeNode) *TreeNode {
 	return root
 }
 
-// 1 https://leetcode.cn/problems/climbing-stairs/description/
+// 爬楼梯 https://leetcode.cn/problems/climbing-stairs/description/
 func climbStairs(n int) int {
 	if n <= 3 {
 		return n
@@ -51,7 +51,7 @@ func climbStairs(n int) int {
 	return b
 }
 
-// 2 https://leetcode.cn/problems/minimum-path-sum/description/
+// 最小路径和 https://leetcode.cn/problems/minimum-path-sum/description/
 func minPathSum(grid [][]int) int {
 	m := len(grid)
 	n := len(grid[0])
@@ -69,7 +69,7 @@ func minPathSum(grid [][]int) int {
 	return grid[m-1][n-1]
 }
 
-// 1 https://leetcode.cn/problems/maximum-depth-of-binary-tree/description/
+//  二叉树的最大深度 https://leetcode.cn/problems/maximum-depth-of-binary-tree/description/
 func maxDepth(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -79,7 +79,7 @@ func maxDepth(root *TreeNode) int {
 	return max(leftDepth, rightDepth) + 1
 }
 
-// 1 https://leetcode.cn/problems/maximum-depth-of-binary-tree/description/
+//  二叉树的最大深度 https://leetcode.cn/problems/maximum-depth-of-binary-tree/description/
 func maxDepth_bfs(root *TreeNode) int {
 	if root == nil {
 		return 0
@@ -102,7 +102,7 @@ func maxDepth_bfs(root *TreeNode) int {
 	}
 	return depth
 }
-// 2 https://leetcode.cn/problems/number-of-islands/description/
+// 岛屿数量 https://leetcode.cn/problems/number-of-islands/description/
 func numIslands(grid [][]byte) int {
 	m := len(grid)
 	n := len(grid[0])

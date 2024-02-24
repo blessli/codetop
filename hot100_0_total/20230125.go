@@ -1,68 +1,85 @@
 package main
 
+// 最大矩形 https://leetcode.cn/problems/maximal-rectangle/description/
 func maximalRectangle(matrix [][]byte) int {
-	m := len(matrix)
-	n := len(matrix[0])
-	dp := make([]int, n)
-	ans := 0
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if i == 0 {
-				dp[j] = int(matrix[i][j]) - '0'
-			} else {
-				if matrix[i][j] == '0' {
-					dp[j] = 0
-				} else {
-					dp[j] += 1
-				}
-			}
-			ans = max(ans, dp[j])
-		}
-		ans = max(ans, largestRectangleArea(dp))
+	if len(matrix) == 0 || len(matrix[0]) == 0 {
+		return 0
 	}
-	return ans
+
+	rows, cols := len(matrix), len(matrix[0])
+	heights := make([]int, cols)
+	maxArea := 0
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			if matrix[i][j] == '1' {
+				heights[j]++
+			} else {
+				heights[j] = 0
+			}
+		}
+		area := largestRectangleArea(heights)
+		if area > maxArea {
+			maxArea = area
+		}
+	}
+
+	return maxArea
 }
 
+// 柱状图中最大的矩形 https://leetcode.cn/problems/largest-rectangle-in-histogram/description/
 func largestRectangleArea(heights []int) int {
-	ans := 0
-	nums := []int{}
-	nums = append(nums, 0)
-	nums = append(nums, heights...)
-	nums = append(nums, 0)
-	stack := []int{}
-	for i := 0; i < len(nums); i++ {
-		for len(stack) > 0 && nums[i] <= nums[stack[len(stack)-1]] {
-			h := nums[stack[len(stack)-1]]
-			stack = stack[:len(stack)-1]
-			if len(stack) == 0 {
-				break
-			}
-			ans = max(ans, h*(i-stack[len(stack)-1]-1))
+	n := len(heights)
+	stack := make([]int, 0)
+	maxArea := 0
+
+	for i := 0; i <= n; i++ {
+		var h int
+		if i < n {
+			h = heights[i]
+		} else {
+			h = 0
 		}
+
+		for len(stack) > 0 && h < heights[stack[len(stack)-1]] {
+			height := heights[stack[len(stack)-1]]
+			stack = stack[:len(stack)-1]
+			width := i
+			if len(stack) > 0 {
+				width = i - stack[len(stack)-1] - 1
+			}
+			area := height * width
+			if area > maxArea {
+				maxArea = area
+			}
+		}
+
 		stack = append(stack, i)
 	}
-	return ans
+
+	return maxArea
 }
 
-// todo:dp
+// 目标和 https://leetcode.cn/problems/target-sum/description/
 func findTargetSumWays(nums []int, target int) int {
 	ans := 0
 	n := len(nums)
 	var dfs func(int, int)
-	dfs = func(pos int, val int) {
-		if pos == n {
-			if val == 0 {
+	dfs = func(index int, sum int) {
+		if index == n {
+			if sum == target {
 				ans++
 			}
 			return
 		}
-		dfs(pos+1, val-nums[pos])
-		dfs(pos+1, val+nums[pos])
+		dfs(index+1, sum+nums[index])
+		dfs(index+1, sum-nums[index])
 	}
-	dfs(0, target)
+	dfs(0, 0)
 	return ans
 }
 
+// 轮转数组 https://leetcode.cn/problems/rotate-array/description/
 func rotate(matrix [][]int) {
 	n := len(matrix)
 	for i := 0; i < n/2; i++ {
@@ -81,43 +98,27 @@ func rotate(matrix [][]int) {
 	}
 }
 
+// 括号生成 https://leetcode.cn/problems/generate-parentheses/description/
 func generateParenthesis(n int) []string {
-	ans := []string{}
-	check := func(nums []int) bool {
-		stack := []int{}
-		for _, v := range nums {
-			if v == 0 {
-				stack = append(stack, v)
-			} else {
-				if len(stack) > 0 {
-					stack = stack[:len(stack)-1]
-				} else {
-					return false
-				}
-			}
-		}
-		return len(stack) == 0
-	}
-	var dfs func(int, []int)
-	dfs = func(pos int, stack []int) {
-		if pos >= 2*n {
-			if !check(stack) {
-				return
-			}
-			str := ""
-			for _, v := range stack {
-				if v == 0 {
-					str += "("
-				} else {
-					str += ")"
-				}
-			}
-			ans = append(ans, str)
+	var result []string
+	var backtrack func(s string, left, right int)
+
+	backtrack = func(s string, left, right int) {
+		if len(s) == 2*n {
+			result = append(result, s)
 			return
 		}
-		dfs(pos+1, append(stack, 0))
-		dfs(pos+1, append(stack, 1))
+
+		if left < n {
+			backtrack(s+"(", left+1, right)
+		}
+
+		if right < left {
+			backtrack(s+")", left, right+1)
+		}
 	}
-	dfs(1, []int{0})
-	return ans
+
+	backtrack("", 0, 0)
+
+	return result
 }

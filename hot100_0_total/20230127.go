@@ -1,139 +1,87 @@
 package main
 
+// 合并二叉树 https://leetcode.cn/problems/merge-two-binary-trees/description/
 func mergeTrees(root1 *TreeNode, root2 *TreeNode) *TreeNode {
-	if root1 == nil && root2 == nil {
-		return nil
-	}
 	if root1 == nil {
 		return root2
 	}
 	if root2 == nil {
 		return root1
 	}
-	root := &TreeNode{}
-	if root1 != nil {
-		root.Val += root1.Val
-	}
-	if root2 != nil {
-		root.Val += root2.Val
-	}
-	root.Left = mergeTrees(root1.Left, root2.Left)
-	root.Right = mergeTrees(root1.Right, root2.Right)
-	return root
+	merged := &TreeNode{Val: root1.Val + root2.Val}
+	merged.Left = mergeTrees(root1.Left, root2.Left)
+	merged.Right = mergeTrees(root1.Right, root2.Right)
+	return merged
 }
 
+// 排序链表 https://leetcode.cn/problems/sort-list/description/
 func sortList(head *ListNode) *ListNode {
-	merge := func(l1, l2 *ListNode) *ListNode {
-		ans := &ListNode{}
-		res, left, right := ans, l1, l2
-		for left != nil && right != nil {
-			if left.Val <= right.Val {
-				ans.Next = left
-				left = left.Next
-			} else {
-				ans.Next = right
-				right = right.Next
-			}
-			ans = ans.Next
-		}
-		if left != nil {
-			ans.Next = left
-		}
-		if right != nil {
-			ans.Next = right
-		}
-		return res.Next
+	if head == nil || head.Next == nil {
+		return head
 	}
-	findMid := func(head *ListNode) *ListNode {
-		left := head
-		right := head.Next.Next
-		for right != nil && right.Next != nil {
-			left = left.Next
-			right = right.Next.Next
-		}
-		return left
+	var prev *ListNode
+	slow, fast := head, head
+	for fast != nil && fast.Next != nil {
+		prev = slow
+		slow = slow.Next
+		fast = fast.Next.Next
 	}
-	var dfs func(*ListNode) *ListNode
-	dfs = func(head *ListNode) *ListNode {
-		if head == nil || head.Next == nil {
-			return head
-		}
-		mid := findMid(head)
-		left := head
-		right := mid.Next
-		mid.Next = nil
-		return merge(dfs(left), dfs(right))
-	}
-	return dfs(head)
+	prev.Next = nil
+	left := sortList(head)
+	right := sortList(slow)
+	return mergeTwoLists(left, right)
 }
 
+// 最长有效括号 https://leetcode.cn/problems/longest-valid-parentheses/description/
 func longestValidParentheses(s string) int {
-	n := len(s)
-	stack := []int{}
-	dp := make([]int, n)
-	for i := 0; i < n; i++ {
+	if len(s) == 0 {
+		return 0
+	}
+	stack := []int{-1}
+	maxLen := 0
+
+	for i := 0; i < len(s); i++ {
 		if s[i] == '(' {
 			stack = append(stack, i)
-		}
-		if s[i] == ')' {
-			if len(stack) == 0 {
-				dp[i] = 1
-				continue
-			}
-			if len(stack) > 0 && s[stack[len(stack)-1]] == '(' {
-				stack = stack[:len(stack)-1]
-			}
-		}
-	}
-	for len(stack) > 0 {
-		dp[stack[len(stack)-1]] = 1
-		stack = stack[:len(stack)-1]
-	}
-	ans := 0
-	pc := 0
-	for i := 0; i < n; i++ {
-		if dp[i] == 1 {
-			ans = max(ans, pc)
-			pc = 0
 		} else {
-			pc++
+			stack = stack[:len(stack)-1]
+			if len(stack) == 0 {
+				stack = append(stack, i)
+			} else {
+				maxLen = max(maxLen, i-stack[len(stack)-1])
+			}
 		}
 	}
-	ans = max(ans, pc)
-	return ans
+
+	return maxLen
 }
 
+// 回文子串 https://leetcode.cn/problems/palindromic-substrings/description/
 func countSubstrings(s string) int {
-	n := len(s)
-	dfs := func(pos int) int {
-		ans := 1
-		left, right := pos-1, pos+1
-		for left >= 0 && right < n && s[left] == s[right] {
-			ans++
+	extendPalindrome := func(s string, left, right int) int {
+		count := 0
+		for left >= 0 && right < len(s) && s[left] == s[right] {
+			count++
 			left--
 			right++
 		}
-		left, right = pos-1, pos
-		for left >= 0 && right < n && s[left] == s[right] {
-			ans++
-			left--
-			right++
-		}
-		return ans
+		return count
 	}
-	ans := 0
-	for i := 0; i < n; i++ {
-		ans += dfs(i)
+	count := 0
+	for i := 0; i < len(s); i++ {
+		count += extendPalindrome(s, i, i)
+		count += extendPalindrome(s, i, i+1)
 	}
-	return ans
+	return count
 }
 
+// 买卖股票的最佳时机 II https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/
 func maxProfit2(prices []int) int {
 	n := len(prices)
 	dp := make([][3]int, n)
 	// f[i][0]: 手上持有股票的最大收益
-    // f[i][1]: 手上不持有股票，并且处于冷冻期中的累计最大收益
-    // f[i][2]: 手上不持有股票，并且不在冷冻期中的累计最大收益
+	// f[i][1]: 手上不持有股票，并且处于冷冻期中的累计最大收益
+	// f[i][2]: 手上不持有股票，并且不在冷冻期中的累计最大收益
 	dp[0][0] = -prices[0]
 	dp[0][1] = 0
 	dp[0][2] = 0
@@ -142,5 +90,5 @@ func maxProfit2(prices []int) int {
 		dp[i][1] = prices[i] + dp[i-1][0]
 		dp[i][2] = max(dp[i-1][1], dp[i-1][2])
 	}
-	return max(dp[n-1][1],dp[n-1][2])
+	return max(dp[n-1][1], dp[n-1][2])
 }

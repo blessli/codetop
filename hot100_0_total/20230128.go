@@ -2,30 +2,37 @@ package main
 
 import "math"
 
+// 最短无序连续子数组 https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/description/
 func findUnsortedSubarray(nums []int) int {
 	n := len(nums)
-	maxv := math.MinInt32
-	right := -1
-	minv := math.MaxInt32
-	left := -1
-	for i := 0; i < n; i++ {
-		if nums[i] >= maxv {
-			maxv = nums[i]
-		} else {
-			right = i
-		}
-		if nums[n-i-1] > minv {
-			left = n - i - 1
-		} else {
-			minv = nums[n-i-1]
-		}
-	}
-	if right == -1 {
+	if n <= 1 {
 		return 0
 	}
+
+	// 找到需要排序的子数组的左边界和右边界
+	left, right := -1, -1
+	maxVal, minVal := nums[0], nums[n-1]
+
+	for i := 0; i < n; i++ {
+		maxVal = max(maxVal, nums[i])
+		if nums[i] < maxVal {
+			right = i
+		}
+
+		minVal = min(minVal, nums[n-1-i])
+		if nums[n-1-i] > minVal {
+			left = n - 1 - i
+		}
+	}
+
+	if left == -1 {
+		return 0
+	}
+
 	return right - left + 1
 }
 
+// 找到字符串中所有字母异位词 https://leetcode.cn/problems/find-all-anagrams-in-a-string/description/
 func findAnagrams(s string, p string) []int {
 	ans := []int{}
 	mp := map[byte]int{}
@@ -64,6 +71,7 @@ func findAnagrams(s string, p string) []int {
 	return ans
 }
 
+// 二叉树展开为链表 https://leetcode.cn/problems/flatten-binary-tree-to-linked-list/description/
 func flatten(root *TreeNode) {
 	if root == nil {
 		return
@@ -81,68 +89,81 @@ func flatten(root *TreeNode) {
 		root.Left = nil
 	}
 }
-// 二叉树中的最大路径和
+
+// 二叉树中的最大路径和 https://leetcode.cn/problems/binary-tree-maximum-path-sum/description/
 func maxPathSum(root *TreeNode) int {
-	ans := math.MinInt32
-	var dfs func(*TreeNode) int
-	dfs = func(root *TreeNode) int {
-		if root == nil {
+	maxSum := math.MinInt32
+
+	var maxPathSumHelper func(node *TreeNode) int
+	maxPathSumHelper = func(node *TreeNode) int {
+		if node == nil {
 			return 0
 		}
-		if root.Left == nil && root.Right == nil {
-			return root.Val
-		}
-		left := dfs(root.Left)
-		right := dfs(root.Right)
-		ans = max(ans, root.Val+left+right)
-		return root.Val + max(left, right)
+
+		left := max(0, maxPathSumHelper(node.Left))
+		right := max(0, maxPathSumHelper(node.Right))
+
+		maxSum = max(maxSum, node.Val+left+right)
+
+		return node.Val + max(left, right)
 	}
-	dfs(root)
-	return ans
+
+	maxPathSumHelper(root)
+
+	return maxSum
 }
 
 // 实现 Trie (前缀树)
+type TrieNode struct {
+	children map[rune]*TrieNode
+	isEnd    bool
+}
+
 type Trie struct {
-	Next [26]*Trie
-	End  bool
+	root *TrieNode
 }
 
 func Constructor() Trie {
-	return Trie{}
+	return Trie{
+		root: &TrieNode{
+			children: map[rune]*TrieNode{},
+			isEnd:    false,
+		},
+	}
 }
 
 func (t *Trie) Insert(word string) {
-	root := t
-	for i := 0; i < len(word); i++ {
-		v := word[i] - 'a'
-		if root.Next[v] == nil {
-			root.Next[v] = &Trie{}
+	node := t.root
+	for _, char := range word {
+		if _, ok := node.children[char]; !ok {
+			node.children[char] = &TrieNode{
+				children: make(map[rune]*TrieNode),
+				isEnd:    false,
+			}
 		}
-		root = root.Next[v]
+		node = node.children[char]
 	}
-	root.End = true
+	node.isEnd = true
 }
 
 func (t *Trie) Search(word string) bool {
-	ans := t.search(word)
-	if ans == nil || !ans.End {
-		return false
-	}
-	return true
-}
-
-func (t *Trie) search(word string) (ans *Trie) {
-	root := t
-	for i := 0; i < len(word); i++ {
-		v := word[i] - 'a'
-		if root.Next[v] == nil {
-			return nil
+	node := t.root
+	for _, char := range word {
+		if _, ok := node.children[char]; !ok {
+			return false
 		}
-		root = root.Next[v]
+		node = node.children[char]
 	}
-	return root
+	return node.isEnd
 }
 
 func (t *Trie) StartsWith(prefix string) bool {
-	return t.search(prefix) != nil
+	node := t.root
+	for _, char := range prefix {
+		if _, ok := node.children[char]; !ok {
+			return false
+		}
+		node = node.children[char]
+	}
+	return true
 }

@@ -1,123 +1,104 @@
 package main
 
-import (
-	"strconv"
-)
-
+// 电话号码的字母组合 https://leetcode.cn/problems/letter-combinations-of-a-phone-number/description/
 func letterCombinations(digits string) []string {
-	grid := [][]string{{"a", "b", "c"}, {"d", "e", "f"}, {"g", "h", "i"}, {"j", "k", "l"}, {"m", "n", "o"}, {"p", "q", "r", "s"}, {"t", "u", "v"}, {"w", "x", "y", "z"}}
+	var phoneMap = map[byte]string{
+		'2': "abc",
+		'3': "def",
+		'4': "ghi",
+		'5': "jkl",
+		'6': "mno",
+		'7': "pqrs",
+		'8': "tuv",
+		'9': "wxyz",
+	}
 	n := len(digits)
-	if n==0{
-		return []string{}
-	}
-	nums := make([]int, n)
 	ans := []string{}
-	for i := 0; i < n; i++ {
-		nums[i] = int(digits[i]) - '0' - 2
+	if n == 0 {
+		return ans
 	}
-	var dfs func(string, int)
-	dfs = func(curr string, pos int) {
-		if pos == n {
-			ans = append(ans, curr)
+	var dfs func(int, string)
+	dfs = func(index int, path string) {
+		if index == n {
+			ans = append(ans, path)
 			return
 		}
-		for i := 0; i < len(grid[nums[pos]]); i++ {
-			dfs(curr+grid[nums[pos]][i], pos+1)
+		letters := phoneMap[digits[index]]
+		for i := 0; i < len(letters); i++ {
+			dfs(index+1, path+string(letters[i]))
 		}
 	}
-	dfs("", 0)
+	dfs(0, "")
 	return ans
 }
+
+// 子集 https://leetcode.cn/problems/subsets/description/
 func subsets(nums []int) [][]int {
 	n := len(nums)
-	ans := make([][]int, 0)
-	vis := map[string]bool{}
-	m := map[int]bool{}
-	var dfs func([]int, int)
-	dfs = func(curr []int, pos int) {
-		val := ""
-		for _, v := range curr {
-			val += strconv.Itoa(v)
-		}
-		if vis[val] {
-			return
-		}
-		vis[val] = true
-		temp := make([]int, 0)
-		temp = append(temp, curr...)
+	ans := [][]int{}
+	var dfs func(start int, path []int)
+	dfs = func(start int, path []int) {
+		temp := make([]int, len(path))
+		copy(temp, path)
 		ans = append(ans, temp)
-		for i := pos; i < n; i++ {
-			if len(curr) < n && !m[i] {
-				v := nums[i]
-				curr = append(curr, v)
-				m[i] = true
-				dfs(curr, i)
-				m[i] = false
-				curr = curr[:len(curr)-1]
-			}
+		for i := start; i < n; i++ {
+			path = append(path, nums[i])
+			dfs(i+1, path)
+			path = path[:len(path)-1]
 		}
 	}
-	dfs([]int{}, 0)
+	dfs(0, []int{})
 	return ans
 }
+
+// 环形链表 II https://leetcode.cn/problems/linked-list-cycle-ii/description/
 func detectCycle(head *ListNode) *ListNode {
 	if head == nil || head.Next == nil {
 		return nil
 	}
-	temp := head
-	pre := head
-	last := head
-	vis := false
-	for last.Next != nil && last.Next.Next != nil {
-		pre = pre.Next
-		last = last.Next.Next
-		if pre == last {
-			vis = true
+	slow, fast := head, head
+	hasCycle := false
+	for fast != nil && fast.Next != nil {
+		slow = slow.Next
+		fast = fast.Next.Next
+		if slow == fast {
+			hasCycle = true
 			break
 		}
 	}
-	if !vis {
+	if !hasCycle {
 		return nil
 	}
-	for pre != temp {
-		pre = pre.Next
-		temp = temp.Next
+	slow = head
+	for slow != fast {
+		slow = slow.Next
+		fast = fast.Next
 	}
-	return pre
+	return slow
 }
-
+// 两数相加 https://leetcode.cn/problems/add-two-numbers/description/
 func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
-	curr := &ListNode{}
-	ans := curr
-	mod := 0
+	dummy := &ListNode{}
+	current := dummy
+	carry := 0
 	for l1 != nil || l2 != nil {
-		if l1 == nil {
-			temp := &ListNode{Val: (l2.Val + mod) % 10}
-			mod = (l2.Val + mod) / 10
-			curr.Next = temp
-			curr = curr.Next
-			l2 = l2.Next
-		} else if l2 == nil {
-			temp := &ListNode{Val: (l1.Val + mod) % 10}
-			mod = (l1.Val + mod) / 10
-			curr.Next = temp
-			curr = curr.Next
-			l1 = l1.Next
-		} else {
-			temp := &ListNode{Val: (l1.Val + l2.Val + mod) % 10}
-			mod = (l1.Val + l2.Val + mod) / 10
-			curr.Next = temp
-			curr = curr.Next
-			l2 = l2.Next
+		sum := carry
+		if l1 != nil {
+			sum += l1.Val
 			l1 = l1.Next
 		}
+		if l2 != nil {
+			sum += l2.Val
+			l2 = l2.Next
+		}
+		current.Next = &ListNode{Val: sum % 10}
+		current = current.Next
+		carry = sum / 10
 	}
-	if mod > 0 {
-		temp := &ListNode{Val: mod}
-		curr.Next = temp
-		curr = curr.Next
+	if carry > 0 {
+		current.Next = &ListNode{Val: carry}
 	}
-	return ans.Next
+	return dummy.Next
 }
 
 type LRUCache struct {

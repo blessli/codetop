@@ -2,25 +2,28 @@ package main
 
 import "sort"
 
-func rob2(root *TreeNode) int {
-	var dfs func(*TreeNode) [2]int
-	ans := 0
-	dfs = func(root *TreeNode) [2]int {
-		if root == nil {
+// 打家劫舍 III https://leetcode.cn/problems/house-robber-iii/description/
+func rob3(root *TreeNode) int {
+	var robSub func(node *TreeNode) [2]int
+	robSub = func(node *TreeNode) [2]int {
+		if node == nil {
 			return [2]int{0, 0}
 		}
-		left := dfs(root.Left)
-		right := dfs(root.Right)
-		res := [2]int{}
-		res[0] = root.Val + left[1] + right[1]
-		res[1] = max(left[0], left[1]) + max(right[0], right[1])
-		ans = max(ans, max(res[0], res[1]))
-		return res
+
+		left := robSub(node.Left)
+		right := robSub(node.Right)
+
+		result := [2]int{0, 0}
+		result[0] = max(left[0], left[1]) + max(right[0], right[1])
+		result[1] = node.Val + left[0] + right[0]
+
+		return result
 	}
-	dfs(root)
-	return ans
+	result := robSub(root)
+	return max(result[0], result[1])
 }
 
+// 根据身高重建队列 https://leetcode.cn/problems/queue-reconstruction-by-height/description/
 func reconstructQueue(people [][]int) [][]int {
 	sort.Slice(people, func(i, j int) bool {
 		a, b := people[i], people[j]
@@ -34,6 +37,7 @@ func reconstructQueue(people [][]int) [][]int {
 	return ans
 }
 
+// 戳气球 https://leetcode.cn/problems/burst-balloons/description/
 func maxCoins(nums []int) int {
 	n := len(nums)
 	nums = append([]int{1}, nums...)

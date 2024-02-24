@@ -1,150 +1,104 @@
 package main
 
-// todo:dp
+// 比特位计数 https://leetcode.cn/problems/counting-bits/description/
 func countBits(n int) []int {
-	data := []int{}
-	if n == 0 {
-		return data
-	}
-	m := map[int]bool{}
-	for i := 2; i <= n; i = i * 2 {
-		m[i] = true
-		data = append(data, i)
-	}
-	dp := make([]int, n+1)
-	dp[1] = 1
-	dfs := func(curr int) int {
-		cnt := 0
-		for i := len(data) - 1; i >= 0 && curr > 0; i-- {
-			if curr >= data[i] {
-				cnt += dp[data[i]]
-				curr -= data[i]
-			}
+	ans := make([]int, n+1)
+	countOnes := func(num int) int {
+		count := 0
+		for num > 0 {
+			count++
+			num = num & (num - 1)
 		}
-		return cnt
+		return count
+	}
+	for i := 0; i <= n; i++ {
+		ans[i] = countOnes(i)
 	}
 
-	for i := 2; i <= n; i++ {
-		if i%2 == 1 {
-			dp[i] = dp[i-1] + 1
-		} else {
-			if m[i] {
-				dp[i] = 1
-			} else {
-				dp[i] = dfs(i)
-			}
-		}
-	}
-	return dp
+	return ans
 }
 
+// 课程表 https://leetcode.cn/problems/course-schedule/description/
 func canFinish(numCourses int, prerequisites [][]int) bool {
-	m := make([][]int, numCourses)
-	for _, edge := range prerequisites {
-		a, b := edge[0], edge[1]
-		if len(m[b]) == 0 {
-			m[b] = make([]int, 0)
-		}
-		m[b] = append(m[b], a)
+	edges := make([][]int, numCourses)
+	inDegree := make([]int, numCourses)
+	for _, pre := range prerequisites {
+		edges[pre[1]] = append(edges[pre[1]], pre[0])
+		inDegree[pre[0]]++
 	}
-	hasCycle := false
-	vis := make([]int, numCourses)
-	f := map[int]bool{}
-	var dfs func(int)
-	dfs = func(pos int) {
-		vis[pos] = 1
-		if hasCycle {
-			return
+	queue := make([]int, 0)
+	for i := 0; i < numCourses; i++ {
+		if inDegree[i] == 0 {
+			queue = append(queue, i)
 		}
-		f[pos] = true
-		for _, v := range m[pos] {
-			if vis[v] == 1 {
-				hasCycle = true
-				return
-			}
-			if vis[v] == 0 {
-				dfs(v)
+	}
+	learned := 0
+	for len(queue) > 0 {
+		course := queue[0]
+		queue = queue[1:]
+		learned++
+		for _, nextCourse := range edges[course] {
+			inDegree[nextCourse]--
+			if inDegree[nextCourse] == 0 {
+				queue = append(queue, nextCourse)
 			}
 		}
-		vis[pos] = 2
 	}
-	for i, _ := range m {
-		if len(m[i]) == 0 {
-			continue
-		}
-		dfs(i)
-		if hasCycle {
-			return false
-		}
-	}
-	return true
+	return learned == numCourses
 }
 
+// 前 K 个高频元素 https://leetcode.cn/problems/top-k-frequent-elements/description/
 func topKFrequent(nums []int, k int) []int {
-	m := map[int]int{}
-	data := []int{}
-	for _, v := range nums {
-		if _, ok := m[v]; !ok {
-			data = append(data, v)
-		}
-		m[v]++
+	freqMap := make(map[int]int)
+	for _, num := range nums {
+		freqMap[num]++
 	}
-	var dfs func(int, int)
-	dfs1 := func(low, high int) int {
-		start := data[low]
-		left, right := low, high
-		for left < right {
-			for left < right && m[data[right]] <= m[start] {
-				right--
-			}
-			data[left] = data[right]
-			for left < right && m[data[left]] >= m[start] {
-				left++
-			}
-			data[right] = data[left]
-		}
-		data[left] = start
-		return left
+
+	var buckets = make([][]int, len(nums)+1)
+	for num, freq := range freqMap {
+		buckets[freq] = append(buckets[freq], num)
 	}
-	dfs = func(low, high int) {
-		if low >= high || low > k {
-			return
+
+	var result []int
+	for i := len(buckets) - 1; i >= 0 && len(result) < k; i-- {
+		if len(buckets[i]) > 0 {
+			result = append(result, buckets[i]...)
 		}
-		mid := dfs1(low, high)
-		dfs(low, mid-1)
-		dfs(mid+1, high)
 	}
-	dfs(0, len(data)-1)
-	return data[:k]
+
+	return result
 }
 
-// 最大正方形 dp
+// 最大正方形 https://leetcode.cn/problems/maximal-square/description/
 func maximalSquare(matrix [][]byte) int {
-	m := len(matrix)
-	n := len(matrix[0])
-	dp := make([][]int, m)
-	for i := 0; i < m; i++ {
-		dp[i] = make([]int, n)
+	if len(matrix) == 0 || len(matrix[0]) == 0 {
+		return 0
 	}
-	ans := 0
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if matrix[i][j] == '0' {
-				continue
+	rows := len(matrix)
+	cols := len(matrix[0])
+	maxSide := 0
+	prev := 0
+	dp := make([]int, cols)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			temp := dp[j]
+			if matrix[i][j] == '1' {
+				if i == 0 || j == 0 {
+					dp[j] = 1
+				} else {
+					dp[j] = min(min(dp[j-1], prev), dp[j]) + 1
+				}
+				maxSide = max(maxSide, dp[j])
+			} else {
+				dp[j] = 0
 			}
-			if i*j == 0 {
-				dp[i][j] = 1
-				ans = max(ans, 1)
-				continue
-			}
-			dp[i][j] = min(dp[i-1][j-1], min(dp[i][j-1], dp[i-1][j])) + 1
-			ans = max(ans, dp[i][j])
+			prev = temp
 		}
 	}
-	return ans * ans
+	return maxSide * maxSide
 }
 
-// 数组中的第K个最大元素 快排
+// 数组中的第K个最大元素 https://leetcode.cn/problems/kth-largest-element-in-an-array/description/
 func findKthLargest_(nums []int, k int) int {
 	var dfs func(int, int)
 	dfs1 := func(low, high int) int {
@@ -174,7 +128,8 @@ func findKthLargest_(nums []int, k int) int {
 	dfs(0, len(nums)-1)
 	return nums[k-1]
 }
-// 大顶堆
+
+// 数组中的第K个最大元素 https://leetcode.cn/problems/kth-largest-element-in-an-array/description/
 func findKthLargest(nums []int, k int) int {
 	n := len(nums)
 	var dfs func(int, int)

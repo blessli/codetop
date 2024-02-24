@@ -1,6 +1,6 @@
 package main
 
-
+// 字符串解码 https://leetcode.cn/problems/decode-string/description/
 func decodeString(s string) string {
 	ans := ""
 	n := len(s)
@@ -88,89 +88,76 @@ func decodeString(s string) string {
 	}
 	return ans
 }
+
+// 从前序与中序遍历序列构造二叉树 https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/
 func buildTree(preorder []int, inorder []int) *TreeNode {
-	var dfs func(int, int, int, int) *TreeNode
-	dfs = func(pre1, pre2, in1, in2 int) *TreeNode {
-		if pre1 > pre2 || in1 > in2 {
-			return nil
-		}
-		root := &TreeNode{Val: preorder[pre1]}
-		pos := in1
-		for i := 0; i < len(inorder); i++ {
-			if inorder[i] == preorder[pre1] {
-				pos = i
-				break
-			}
-		}
-		root.Left = dfs(pre1+1, pre1+pos-in1, in1, pos-1)
-		root.Right = dfs(pre1+pos-in1+1, pre2, pos+1, in2)
-		return root
+	if len(preorder) == 0 {
+		return nil
 	}
-	return dfs(0, len(preorder)-1, 0, len(inorder)-1)
+	rootVal := preorder[0]
+	root := &TreeNode{Val: rootVal}
+	var rootIndex int
+	for i, val := range inorder {
+		if val == rootVal {
+			rootIndex = i
+			break
+		}
+	}
+	root.Left = buildTree(preorder[1:1+rootIndex], inorder[:rootIndex])
+	root.Right = buildTree(preorder[1+rootIndex:], inorder[rootIndex+1:])
+	return root
 }
 
+// 汉明距离 https://leetcode.cn/problems/hamming-distance/description/
 func hammingDistance(x int, y int) int {
-	ans := 0
-	xx, yy := 0, 0
-	for x != 0 || y != 0 {
-		xx = x % 2
-		x /= 2
-		yy = y % 2
-		y /= 2
-		if xx != yy {
-			ans++
-		}
+	xor := x ^ y
+	count := 0
+	for xor != 0 {
+		count += xor & 1
+		xor >>= 1
 	}
-	return ans
+	return count
 }
 
+// 找到所有数组中消失的数字 https://leetcode.cn/problems/find-all-numbers-disappeared-in-an-array/description/
 func findDisappearedNumbers(nums []int) []int {
-	for i := 0; i < len(nums); i++ {
-		pos := i
-		temp := nums[pos]
-		if temp == nums[temp-1] {
-			continue
-		}
-		for {
-			nums[pos] = nums[temp-1]
-			nums[temp-1] = temp
-			temp = nums[pos]
-			if temp == nums[temp-1] {
-				break
-			}
+	result := []int{}
+	for _, num := range nums {
+		index := abs(num) - 1
+		if nums[index] > 0 {
+			nums[index] = -nums[index]
 		}
 	}
-	ans := []int{}
-	for i := 0; i < len(nums); i++ {
-		if nums[i] != i+1 {
-			ans = append(ans, i+1)
+	for i, num := range nums {
+		if num > 0 {
+			result = append(result, i+1)
 		}
 	}
-	return ans
+	return result
 }
+func abs(num int) int {
+	if num < 0 {
+		return -num
+	}
+	return num
+}
+
+// 路径总和 https://leetcode.cn/problems/path-sum/description/
 func pathSum(root *TreeNode, targetSum int) int {
-	var dfs func(*TreeNode) int
-	var dfsPath func(*TreeNode, int) int
-	dfsPath = func(tn *TreeNode, sum int) int {
-		if tn == nil {
+	prefixSumMap := make(map[int]int)
+	prefixSumMap[0] = 1
+	var dfs func(node *TreeNode, currentSum, targetSum int, prefixSumMap map[int]int) int
+	dfs = func(node *TreeNode, currentSum, targetSum int, prefixSumMap map[int]int) int {
+		if node == nil {
 			return 0
 		}
-		res := 0
-		if sum == tn.Val {
-			res++
-		}
-		res += dfsPath(tn.Left, sum-tn.Val)
-		res += dfsPath(tn.Right, sum-tn.Val)
-		return res
+		currentSum += node.Val
+		count := prefixSumMap[currentSum-targetSum]
+		prefixSumMap[currentSum]++
+		count += dfs(node.Left, currentSum, targetSum, prefixSumMap)
+		count += dfs(node.Right, currentSum, targetSum, prefixSumMap)
+		prefixSumMap[currentSum]--
+		return count
 	}
-	dfs = func(tn *TreeNode) int {
-		if tn == nil {
-			return 0
-		}
-		ret := dfsPath(tn, targetSum)
-		ret += dfs(tn.Left)
-		ret += dfs(tn.Right)
-		return ret
-	}
-	return dfs(root)
+	return dfs(root, 0, targetSum, prefixSumMap)
 }

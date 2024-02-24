@@ -68,7 +68,7 @@ func searchRange(nums []int, target int) []int {
 	if len(nums) == 0 {
 		return []int{-1, -1}
 	}
-	search := func(target int, isLeft bool) int {
+	search := func(target int) int {
 		left, right := 0, len(nums)
 		for left < right {
 			mid := left + (right-left)/2
@@ -80,11 +80,11 @@ func searchRange(nums []int, target int) []int {
 		}
 		return right
 	}
-	left := search(target, true)
+	left := search(target)
 	if left >= len(nums) || nums[left] != target {
 		return []int{-1, -1}
 	}
-	right := search(target+1, false) - 1
+	right := search(target+1) - 1
 	return []int{left, right}
 }
 

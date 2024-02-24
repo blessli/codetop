@@ -1,97 +1,104 @@
 package main
 
-import "math"
-
+// 组合总和 https://leetcode.cn/problems/combination-sum/description/
 func combinationSum(candidates []int, target int) [][]int {
 	n := len(candidates)
-	ans := make([][]int, 0)
-	var dfs func([]int, int, int)
-	dfs = func(curr []int, sum int, pos int) {
-		if sum == target {
-			temp := make([]int, 0)
-			temp = append(temp, curr...)
-			ans = append(ans, temp)
+	ans := [][]int{}
+	var dfs func(int, int, []int)
+	dfs = func(start int, target int, path []int) {
+		if target == 0 {
+			tmp := make([]int, len(path))
+			copy(tmp, path)
+			ans = append(ans, tmp)
+			return
 		}
-		for i := pos; i < n; i++ {
-			v := candidates[i]
-			if sum+v <= target {
-				curr = append(curr, v)
-				dfs(curr, sum+v, i)
-				curr = curr[:len(curr)-1]
+		for i := start; i < n; i++ {
+			if candidates[i] > target {
+				continue
 			}
+			path = append(path, candidates[i])
+			dfs(i, target-candidates[i], path)
+			path = path[:len(path)-1]
 		}
 	}
-	dfs([]int{}, 0, 0)
-	return ans
-}
-// 乘积最大子数组 优雅
-func maxProduct(nums []int) int {
-	ans := math.MinInt32
-	n := len(nums)
-	mindp := []int{}
-	maxdp := []int{}
-	mindp = append(mindp, nums...)
-	maxdp = append(maxdp, nums...)
-	ans = max(ans, maxdp[0])
-	for i := 1; i < n; i++ {
-		maxdp[i] = max(maxdp[i-1]*nums[i], max(nums[i], mindp[i-1]*nums[i]))
-		mindp[i] = min(mindp[i-1]*nums[i], min(nums[i], maxdp[i-1]*nums[i]))
-		ans = max(ans, maxdp[i])
-	}
+	dfs(0, target, []int{})
 	return ans
 }
 
+// 乘积最大子数组 https://leetcode.cn/problems/maximum-product-subarray/description/
+func maxProduct(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+	maxProd, minProd, result := nums[0], nums[0], nums[0]
+	for i := 1; i < len(nums); i++ {
+		if nums[i] < 0 {
+			maxProd, minProd = minProd, maxProd
+		}
+		maxProd = max(nums[i], maxProd*nums[i])
+		minProd = min(nums[i], minProd*nums[i])
+		result = max(result, maxProd)
+	}
+	return result
+}
+
+// 打家劫舍 https://leetcode.cn/problems/house-robber/description/
 func rob(nums []int) int {
 	n := len(nums)
-	dp := []int{}
-	dp = append(dp, nums...)
-	ans := 0
-	for i := 0; i < n; i++ {
-		for j := 0; j < i; j++ {
-			if j+1 < i {
-				dp[i] = max(dp[i], dp[j]+nums[i])
-			}
-		}
-		ans = max(ans, dp[i])
+	if n == 0 {
+		return 0
 	}
-	return ans
+	if n == 1 {
+		return nums[0]
+	}
+	dp := make([]int, n)
+	dp[0] = nums[0]
+	dp[1] = max(nums[0], nums[1])
+	for i := 2; i < n; i++ {
+		dp[i] = max(dp[i-1], dp[i-2]+nums[i])
+	}
+	return dp[n-1]
 }
 
+// 打家劫舍 https://leetcode.cn/problems/house-robber/description/
+func rob1(nums []int) int {
+	n := len(nums)
+	if n == 0 {
+		return 0
+	}
+	if n == 1 {
+		return nums[0]
+	}
+	prev1 := 0
+	prev2 := 0
+	for _, num := range nums {
+		temp := prev1
+		prev1 = max(prev1, prev2+num)
+		prev2 = temp
+	}
+	return prev1
+}
+// 合并两个有序链表 https://leetcode.cn/problems/merge-two-sorted-lists/description/
 func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
-	if list1 == nil {
-		return list2
-	}
-	if list2 == nil {
-		return list1
-	}
-	curr := &ListNode{}
-	ans := curr
-	for list1 != nil || list2 != nil {
-		if list1 != nil && list2 != nil {
-			if list1.Val <= list2.Val {
-				temp := &ListNode{Val: list1.Val}
-				curr.Next = temp
-				curr = curr.Next
-				list1 = list1.Next
-			} else {
-				temp := &ListNode{Val: list2.Val}
-				curr.Next = temp
-				curr = curr.Next
-				list2 = list2.Next
-			}
-		} else if list1 != nil {
-			temp := &ListNode{Val: list1.Val}
-			curr.Next = temp
-			curr = curr.Next
+	dummy := &ListNode{}
+	current := dummy
+	for list1 != nil && list2 != nil {
+		if list1.Val < list2.Val {
+			current.Next = list1
 			list1 = list1.Next
 		} else {
-			temp := &ListNode{Val: list2.Val}
-			curr.Next = temp
-			curr = curr.Next
+			current.Next = list2
 			list2 = list2.Next
 		}
+		current = current.Next
 	}
-	return ans.Next
+	if list1 != nil {
+		current.Next = list1
+	}
+	if list2 != nil {
+		current.Next = list2
+	}
+	return dummy.Next
 }
 
 type MinStack struct {

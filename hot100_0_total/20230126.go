@@ -2,114 +2,105 @@ package main
 
 import (
 	"sort"
+	"strings"
 )
 
+// 合并 K 个升序链表 https://leetcode.cn/problems/merge-k-sorted-lists/description/
 func mergeKLists(lists []*ListNode) *ListNode {
-	n := len(lists)
-	if n == 0 {
+	if len(lists) == 0 {
 		return nil
 	}
-	if n == 1 {
-		return lists[0]
-	}
-	if n == 2 {
-		return mergeTwoLists(lists[0], lists[1])
-	}
-	var merge func([]*ListNode, int, int) *ListNode
-	merge = func(lists []*ListNode, low, high int) *ListNode {
-		if low == high {
-			return lists[low]
+	var merge func(lists []*ListNode, left, right int) *ListNode
+	merge = func(lists []*ListNode, left, right int) *ListNode {
+		if left == right {
+			return lists[left]
 		}
-		if low+1 == high {
-			return mergeTwoLists(lists[low], lists[high])
+		if left < right {
+			mid := left + (right-left)/2
+			l1 := merge(lists, left, mid)
+			l2 := merge(lists, mid+1, right)
+			return mergeTwoLists(l1, l2)
 		}
-		mid := low + (high-low)/2
-		return mergeTwoLists(merge(lists, low, mid), merge(lists, mid, high))
+		return nil
 	}
 	return merge(lists, 0, len(lists)-1)
 }
 
+// 不同的二叉搜索树 https://leetcode.cn/problems/unique-binary-search-trees/description/
 func numTrees(n int) int {
-	dp := make([]int, n+1)
-	dp[0] = 1
-	dp[1] = 1
-	for i := 2; i <= n; i++ {
-		for j := 0; j < i; j++ {
-			dp[i] += dp[j] * dp[i-j-1]
-		}
-	}
-	return dp[n]
+	if n <= 0 {
+        return 0
+    }
+    
+    dp := make([]int, n+1)
+    dp[0], dp[1] = 1, 1
+    
+    for i := 2; i <= n; i++ {
+        for j := 1; j <= i; j++ {
+            dp[i] += dp[j-1] * dp[i-j]
+        }
+    }
+    
+    return dp[n]
 }
 
+// 颜色分类 https://leetcode.cn/problems/sort-colors/description/
 func sortColors(nums []int) {
-	dfs := func(nums []int, target int) int {
-		cnt := 0
-		for i := 0; i < len(nums); i++ {
-			if nums[i] == target {
-				nums[cnt], nums[i] = nums[i], nums[cnt]
-				cnt++
-			}
-		}
-		return cnt
+	count := make([]int, 3)
+	for _, num := range nums {
+		count[num]++
 	}
-	cnt0 := dfs(nums, 0)
-	dfs(nums[cnt0:], 1)
+	index := 0
+	for color := 0; color < 3; color++ {
+		for count[color] > 0 {
+			nums[index] = color
+			index++
+			count[color]--
+		}
+	}
 }
 
+// 字母异位词分组 https://leetcode.cn/problems/group-anagrams/description/
 func groupAnagrams(strs []string) [][]string {
-	m := map[string][]int{}
-	dfs := func(s string) string {
-		ss := []rune(s)
-		sort.Slice(ss, func(i, j int) bool {
-			return ss[i] <= ss[j]
-		})
-		return string(ss)
+	anagrams := make(map[string][]string)
+	
+	for _, str := range strs {
+		s := strings.Split(str, "")
+		sort.Strings(s)
+		sortedStr := strings.Join(s, "")
+		
+		anagrams[sortedStr] = append(anagrams[sortedStr], str)
 	}
-	for i, v := range strs {
-		nv := dfs(v)
-		if _, ok := m[nv]; !ok {
-			m[nv] = make([]int, 0)
-		}
-		m[nv] = append(m[nv], i)
+	
+	result := make([][]string, 0, len(anagrams))
+	for _, v := range anagrams {
+		result = append(result, v)
 	}
-	ans := make([][]string, len(m))
-	index := 0
-	for _, v := range m {
-		ans[index] = make([]string, 0)
-		for i := 0; i < len(v); i++ {
-			ans[index] = append(ans[index], strs[v[i]])
-		}
-		index++
-	}
-	return ans
+	
+	return result
 }
-// 类似：0-1背包问题。空间复杂度待优化
+
+
+// 分割等和子集 https://leetcode.cn/problems/partition-equal-subset-sum/description/
 func canPartition(nums []int) bool {
-	sum := 0
-	for _, v := range nums {
-		sum += v
-	}
-	if sum%2 == 1 {
-		return false
-	}
-	n := len(nums)
-	sum = sum / 2
-	dp := make([][]bool, n)
-	for i := 0; i < n; i++ {
-		dp[i] = make([]bool, sum+1)
-	}
-	for i := 0; i < n; i++ {
-		for w := 1; w <= sum; w++ {
-			if i == 0 {
-				dp[i][w] = (w == nums[i])
-				continue
-			}
-			if w < nums[i] {
-				dp[i][w] = dp[i-1][w]
-			} else {
-				dp[i][w] = dp[i-1][w] || dp[i-1][w-nums[i]]
-			}
-		}
-	}
-	return dp[n-1][sum]
+    total := 0
+    for _, num := range nums {
+        total += num
+    }
+    
+    if total%2 != 0 {
+        return false
+    }
+    
+    target := total / 2
+    dp := make([]bool, target+1)
+    dp[0] = true
+    
+    for _, num := range nums {
+        for i := target; i >= num; i-- {
+            dp[i] = dp[i] || dp[i-num]
+        }
+    }
+    
+    return dp[target]
 }

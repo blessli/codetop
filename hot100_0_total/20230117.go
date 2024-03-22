@@ -75,8 +75,8 @@ func reverseList2(head *ListNode) *ListNode {
 	current := head
 	for current != nil {
 		next := current.Next
-		current.Next = prev
-		prev = current
+		current.Next = prev// 当前节点的下一个节点指向前一个节点
+		prev = current // 更新前一个节点和当前节点
 		current = next
 	}
 	return prev

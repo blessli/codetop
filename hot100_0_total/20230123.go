@@ -99,38 +99,33 @@ func maximalSquare(matrix [][]byte) int {
 }
 
 // 数组中的第K个最大元素 https://leetcode.cn/problems/kth-largest-element-in-an-array/description/
-func findKthLargest_(nums []int, k int) int {
-	var dfs func(int, int)
-	dfs1 := func(low, high int) int {
-		start := nums[low]
-		left, right := low, high
-		for left < right {
-			for left < right && nums[right] <= start {
-				right--
+func findKthLargest(nums []int, k int) int {
+    var quickSelect func(nums []int, left, right, k int) int
+	quickSelect = func(nums []int, left, right, k int) int {
+		pivot := nums[right]
+		i := left
+		for j := left; j < right; j++ {
+			if nums[j] < pivot {
+				nums[i], nums[j] = nums[j], nums[i]
+				i++
 			}
-			nums[left] = nums[right]
-			for left < right && nums[left] >= start {
-				left++
-			}
-			nums[right] = nums[left]
 		}
-		nums[left] = start
-		return left
-	}
-	dfs = func(low, high int) {
-		if low >= high || low >= k {
-			return
+		nums[i], nums[right] = nums[right], nums[i]
+
+		if i == k {
+			return nums[i]
+		} else if i < k {
+			return quickSelect(nums, i+1, right, k)
+		} else {
+			return quickSelect(nums, left, i-1, k)
 		}
-		mid := dfs1(low, high)
-		dfs(low, mid-1)
-		dfs(mid+1, high)
 	}
-	dfs(0, len(nums)-1)
-	return nums[k-1]
+
+	return quickSelect(nums, 0, len(nums)-1, len(nums)-k)
 }
 
 // 数组中的第K个最大元素 https://leetcode.cn/problems/kth-largest-element-in-an-array/description/
-func findKthLargest(nums []int, k int) int {
+func findKthLargest1(nums []int, k int) int {
 	n := len(nums)
 	var dfs func(int, int)
 	dfs = func(i, n int) {

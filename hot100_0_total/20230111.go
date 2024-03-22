@@ -69,6 +69,31 @@ func threeSum(nums []int) [][]int {
 	return ans
 }
 
+// 最接近的三数之和 https://leetcode.cn/problems/3sum-closest/description/
+func threeSumClosest(nums []int, target int) int {
+    sort.Ints(nums)
+    closestSum := nums[0] + nums[1] + nums[2]
+
+    for i := 0; i < len(nums)-2; i++ {
+        left, right := i+1, len(nums)-1
+        for left < right {
+            sum := nums[i] + nums[left] + nums[right]
+            if abs(sum-target) < abs(closestSum-target) {
+                closestSum = sum
+            }
+            if sum < target {
+                left++
+            } else if sum > target {
+                right--
+            } else {
+                return sum
+            }
+        }
+    }
+
+    return closestSum
+}
+
 // 最大子数组和 https://leetcode.cn/problems/maximum-subarray/description/
 func maxSubArray(nums []int) int {
 	if len(nums) == 0 {

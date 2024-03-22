@@ -142,22 +142,33 @@ func abs(num int) int {
 	return num
 }
 
-// 路径总和 https://leetcode.cn/problems/path-sum/description/
-func pathSum(root *TreeNode, targetSum int) int {
-	prefixSumMap := make(map[int]int)
-	prefixSumMap[0] = 1
-	var dfs func(node *TreeNode, currentSum, targetSum int, prefixSumMap map[int]int) int
-	dfs = func(node *TreeNode, currentSum, targetSum int, prefixSumMap map[int]int) int {
+// 路径总和 II https://leetcode.cn/problems/path-sum-ii/description/
+func pathSum(root *TreeNode, targetSum int) [][]int {
+	var result [][]int
+	var path []int
+	var dfs func(*TreeNode, int)
+
+	dfs = func(node *TreeNode, remaining int) {
 		if node == nil {
-			return 0
+			return
 		}
-		currentSum += node.Val
-		count := prefixSumMap[currentSum-targetSum]
-		prefixSumMap[currentSum]++
-		count += dfs(node.Left, currentSum, targetSum, prefixSumMap)
-		count += dfs(node.Right, currentSum, targetSum, prefixSumMap)
-		prefixSumMap[currentSum]--
-		return count
+
+		remaining -= node.Val
+		path = append(path, node.Val)
+
+		if node.Left == nil && node.Right == nil && remaining == 0 {
+			tmp := make([]int, len(path))
+			copy(tmp, path)
+			result = append(result, tmp)
+		}
+
+		dfs(node.Left, remaining)
+		dfs(node.Right, remaining)
+
+		path = path[:len(path)-1]
 	}
-	return dfs(root, 0, targetSum, prefixSumMap)
+
+	dfs(root, targetSum)
+
+	return result
 }

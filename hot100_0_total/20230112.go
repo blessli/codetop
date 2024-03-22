@@ -90,6 +90,11 @@ func maxDepth_bfs(root *TreeNode) int {
 		size := len(queue)
 		for i := 0; i < size; i++ {
 			curr := queue[i]
+			/** 求最小深度
+			if curr.Left != nil && curr.Right != nil {
+				return depth
+			}
+			*/
 			if curr.Left != nil {
 				queue = append(queue, curr.Left)
 			}

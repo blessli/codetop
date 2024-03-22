@@ -69,8 +69,8 @@ func rob1(nums []int) int {
 	if n == 1 {
 		return nums[0]
 	}
-	prev1 := 0
-	prev2 := 0
+	prev1 := 0 // 存储到当前位置为止，包括当前位置的房屋能够偷到的最大金额。
+	prev2 := 0 // 存储到前一个位置为止（不包括当前位置的房屋）能够偷到的最大金额。
 	for _, num := range nums {
 		temp := prev1
 		prev1 = max(prev1, prev2+num)
@@ -102,33 +102,31 @@ func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
 }
 
 type MinStack struct {
-	data    []int
-	mindata []int
+    stack []int
+    minStack []int
 }
-
 func Constructor2() MinStack {
-	return MinStack{}
+    return MinStack{}
 }
 
 func (this *MinStack) Push(val int) {
-	this.data = append(this.data, val)
-	if len(this.mindata) == 0 || val < this.mindata[len(this.mindata)-1] {
-		this.mindata = append(this.mindata, val)
-	}
+    this.stack = append(this.stack, val)
+    if len(this.minStack) == 0 || val <= this.minStack[len(this.minStack)-1] {
+        this.minStack = append(this.minStack, val)
+    }
 }
 
 func (this *MinStack) Pop() {
-	top := this.Top()
-	if top == this.mindata[len(this.mindata)-1] {
-		this.mindata = this.mindata[:len(this.mindata)-1]
-	}
-	this.data = this.data[:len(this.data)-1]
+    if this.stack[len(this.stack)-1] == this.minStack[len(this.minStack)-1] {
+        this.minStack = this.minStack[:len(this.minStack)-1]
+    }
+    this.stack = this.stack[:len(this.stack)-1]
 }
 
 func (this *MinStack) Top() int {
-	return this.data[len(this.data)-1]
+    return this.stack[len(this.stack)-1]
 }
 
 func (this *MinStack) GetMin() int {
-	return this.mindata[len(this.mindata)-1]
+    return this.minStack[len(this.minStack)-1]
 }

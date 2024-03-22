@@ -46,7 +46,7 @@ func longestValidParentheses(s string) int {
 		} else {
 			stack = stack[:len(stack)-1]
 			if len(stack) == 0 {
-				stack = append(stack, i)
+				stack = append(stack, i)// 如果栈为空，将当前右括号的索引入栈作为新的起点
 			} else {
 				maxLen = max(maxLen, i-stack[len(stack)-1])
 			}
@@ -77,18 +77,22 @@ func countSubstrings(s string) int {
 
 // 买卖股票的最佳时机 II https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/
 func maxProfit2(prices []int) int {
-	n := len(prices)
-	dp := make([][3]int, n)
-	// f[i][0]: 手上持有股票的最大收益
-	// f[i][1]: 手上不持有股票，并且处于冷冻期中的累计最大收益
-	// f[i][2]: 手上不持有股票，并且不在冷冻期中的累计最大收益
-	dp[0][0] = -prices[0]
-	dp[0][1] = 0
-	dp[0][2] = 0
-	for i := 1; i < n; i++ {
-		dp[i][0] = max(dp[i-1][0], dp[i-1][2]-prices[i])
-		dp[i][1] = prices[i] + dp[i-1][0]
-		dp[i][2] = max(dp[i-1][1], dp[i-1][2])
-	}
-	return max(dp[n-1][1], dp[n-1][2])
+    if len(prices) <= 1 {
+        return 0
+    }
+
+    n := len(prices)
+    dp := make([][3]int, n)
+	// dp[i][0]表示第i天持有股票的最大利润，
+	// dp[i][1]表示第i天不持有股票且不处于冷冻期的最大利润
+	// dp[i][2]表示第i天不持有股票且处于冷冻期的最大利润
+
+    dp[0][0] = -prices[0]
+    for i := 1; i < n; i++ {
+        dp[i][0] = max(dp[i-1][0], dp[i-1][1]-prices[i])
+        dp[i][1] = max(dp[i-1][1], dp[i-1][2])
+        dp[i][2] = dp[i-1][0] + prices[i]
+    }
+
+    return max(dp[n-1][1], dp[n-1][2])
 }

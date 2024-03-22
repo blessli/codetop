@@ -76,6 +76,7 @@ func detectCycle(head *ListNode) *ListNode {
 	}
 	return slow
 }
+
 // 两数相加 https://leetcode.cn/problems/add-two-numbers/description/
 func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	dummy := &ListNode{}
@@ -100,76 +101,97 @@ func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	}
 	return dummy.Next
 }
-
-type LRUCache struct {
-	cache    map[int]int
-	capacity int
-	count    int
-	list     *Node
+// 两数相加 https://leetcode.cn/problems/add-two-numbers/description
+func addTwoNumbers_(l1 *ListNode, l2 *ListNode, carry int) *ListNode {
+	// 递归写法
+	if l1 == nil && l2 == nil && carry == 0 {
+		return nil
+	}
+	sum := carry
+	if l1 != nil {
+		sum += l1.Val
+		l1 = l1.Next
+	}
+	if l2 != nil {
+		sum += l2.Val
+		l2 = l2.Next
+	}
+	newNode := &ListNode{Val: sum % 10}
+	newNode.Next = addTwoNumbers_(l1, l2, sum/10)
+	return newNode
 }
 
-// 偷懒没用双向链表，险些超时
+type LRUCache struct {
+	capacity int
+	cache    map[int]*Node
+	head     *Node
+	tail     *Node
+}
+
 type Node struct {
-	Val  int
-	Next *Node
+	key   int
+	value int
+	prev  *Node
+	next  *Node
 }
 
 func Constructor1(capacity int) LRUCache {
-	return LRUCache{cache: make(map[int]int), capacity: capacity, list: nil}
+	head := &Node{}
+	tail := &Node{}
+	head.next = tail
+	tail.prev = head
+	return LRUCache{
+		capacity: capacity,
+		cache:    make(map[int]*Node),
+		head:     head,
+		tail:     tail,
+	}
 }
 
-func (c *LRUCache) Get(key int) int {
-	v, ok := c.cache[key]
-	if !ok {
-		return -1
+func (this *LRUCache) Get(key int) int {
+	if node, ok := this.cache[key]; ok {
+		this.moveToHead(node)
+		return node.value
 	}
-	if c.list == nil {
-		panic("list nil")
-	}
-	if c.count > 1 && c.list.Val != key {
-		c.refresh(key)
-	}
-	return v
+	return -1
 }
 
-func (c *LRUCache) refresh(key int) {
-	pre := c.list
-	curr := c.list.Next
-	for curr != nil && curr.Val != key {
-		pre = curr
-		curr = curr.Next
-	}
-	pre.Next = pre.Next.Next
-	c.list = &Node{Val: key, Next: c.list}
-}
-
-func (c *LRUCache) Put(key int, value int) {
-	unHit := c.Get(key) == -1
-	c.cache[key] = value
-	if !unHit {
-		return
-	}
-	if c.count < c.capacity {
-		if c.count == 0 {
-			c.list = &Node{Val: key}
-		} else {
-			c.list = &Node{Val: key, Next: c.list}
-		}
-		c.count++
+func (this *LRUCache) Put(key int, value int) {
+	if node, ok := this.cache[key]; ok {
+		node.value = value
+		this.moveToHead(node)
 	} else {
-		if c.capacity == 1 {
-			delete(c.cache, c.list.Val)
-			c.list = &Node{Val: key}
-			return
+		newNode := &Node{key: key, value: value}
+		this.cache[key] = newNode
+		this.addToHead(newNode)
+
+		if len(this.cache) > this.capacity {
+			tailKey := this.tail.prev.key
+			this.removeNode(this.tail.prev)
+			delete(this.cache, tailKey)
 		}
-		pre := c.list
-		curr := c.list
-		for curr.Next != nil {
-			pre = curr
-			curr = curr.Next
-		}
-		delete(c.cache, curr.Val)
-		pre.Next = nil
-		c.list = &Node{Val: key, Next: c.list}
 	}
+}
+
+func (this *LRUCache) moveToHead(node *Node) {
+	this.removeNode(node)
+	this.addToHead(node)
+}
+
+func (this *LRUCache) removeNode(node *Node) {
+	if node.prev != nil {
+		node.prev.next = node.next
+	}
+	if node.next != nil {
+		node.next.prev = node.prev
+	}
+}
+
+func (this *LRUCache) addToHead(node *Node) {
+	if this.head.next != nil {
+		this.head.next.prev = node
+	}
+	node.next = this.head.next
+	node.prev = this.head
+	this.head.next = node
 }

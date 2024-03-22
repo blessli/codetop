@@ -82,21 +82,22 @@ func findTargetSumWays(nums []int, target int) int {
 // 轮转数组 https://leetcode.cn/problems/rotate-array/description/
 func rotate(matrix [][]int) {
 	n := len(matrix)
-	for i := 0; i < n/2; i++ {
-		for j := 0; j < n; j++ {
-			temp := matrix[i][j]
-			matrix[i][j] = matrix[n-i-1][j]
-			matrix[n-i-1][j] = temp
+
+	// 先对矩阵进行转置操作，即将矩阵沿着主对角线（左上-右下）进行镜像对称
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
 		}
 	}
+
+	// 再对每一行进行水平翻转，即将每一行的元素进行左右交换
 	for i := 0; i < n; i++ {
-		for j := 0; j <= i; j++ {
-			temp := matrix[i][j]
-			matrix[i][j] = matrix[j][i]
-			matrix[j][i] = temp
+		for j := 0; j < n/2; j++ {
+			matrix[i][j], matrix[i][n-1-j] = matrix[i][n-1-j], matrix[i][j]
 		}
 	}
 }
+
 
 // 括号生成 https://leetcode.cn/problems/generate-parentheses/description/
 func generateParenthesis(n int) []string {

@@ -76,17 +76,28 @@ func flatten(root *TreeNode) {
 	if root == nil {
 		return
 	}
-	flatten(root.Left)
-	flatten(root.Right)
-	left := root.Left
-	right := root.Right
-	if left != nil {
-		for left.Right != nil {
-			left = left.Right
+
+	stack := []*TreeNode{root}
+	var prev *TreeNode
+
+	for len(stack) > 0 {
+		node := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		if prev != nil {
+			prev.Right = node
+			prev.Left = nil
 		}
-		left.Right = right
-		root.Right = root.Left
-		root.Left = nil
+
+		if node.Right != nil {
+			stack = append(stack, node.Right)
+		}
+
+		if node.Left != nil {
+			stack = append(stack, node.Left)
+		}
+
+		prev = node
 	}
 }
 

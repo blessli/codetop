@@ -122,6 +122,26 @@ func lengthOfLIS(nums []int) int {
 	}
 	return size
 }
+// 最长公共子序列 https://leetcode.cn/problems/longest-common-subsequence/description/
+func longestCommonSubsequence(text1 string, text2 string) int {
+    m, n := len(text1), len(text2)
+    dp := make([]int, n+1)
+    var prev int
+
+    for i := 1; i <= m; i++ {
+        prev = 0
+        for j := 1; j <= n; j++ {
+            tmp := dp[j]
+            if text1[i-1] == text2[j-1] {
+                dp[j] = prev + 1
+            } else {
+                dp[j] = max(dp[j], dp[j-1])
+            }
+            prev = tmp
+        }
+    }
+    return dp[n]
+}
 
 // 买卖股票的最佳时机 https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/description/
 func maxProfit(prices []int) int {
